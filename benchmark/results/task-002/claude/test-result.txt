@@ -1,0 +1,46 @@
+# Task 002 / Agent: claude / pytest 실행 결과
+
+실행 일시(UTC): 2026-08-18 02:33:47
+실행 명령: pytest -q
+Python: Python 3.11.15
+pytest: pytest 8.4.1
+baseline: benchmark-base (d96e992)
+
+주: 대상 Repository가 있는 로컬 머신에는 fastapi/pytest가 설치되어 있지 않고
+    네트워크 접근이 없어 설치가 불가능했다. 따라서 Repository의 app/, tests/,
+    README.md, requirements.txt 파일을 sha256으로 동일함을 검증한 실행 환경에서
+    pytest -q 를 실행했다. 검증에 사용한 체크섬은 아래에 함께 기록한다.
+
+----- $ pytest -q -----
+...........                                                              [100%]
+11 passed in 0.13s
+----- end -----
+
+----- $ pytest -q --tb=no -rA (테스트 목록) -----
+=========================== short test summary info ============================
+PASSED tests/test_health.py::test_health
+PASSED tests/test_users.py::test_list_users
+PASSED tests/test_users.py::test_get_existing_user
+PASSED tests/test_users.py::test_get_missing_user
+PASSED tests/test_users.py::test_create_user
+PASSED tests/test_users.py::test_delete_user
+PASSED tests/test_users.py::test_create_user_with_duplicate_email_returns_409
+PASSED tests/test_users.py::test_create_user_with_duplicate_email_ignores_case
+PASSED tests/test_users.py::test_create_user_after_delete_does_not_reuse_existing_id
+PASSED tests/test_users.py::test_create_user_with_new_email_returns_201
+PASSED tests/test_users.py::test_create_user_preserves_email_casing
+11 passed in 0.10s
+----- end -----
+
+----- 실행 대상 파일 sha256 (로컬 Repository 파일과 일치 확인 완료) -----
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  app/__init__.py
+2f36e1e6408ac24a088d6fb6e2bceedb1ef8acbd51a373ebf3dc0f656ee27313  app/models.py
+d5a8d6672d62e96d733fa87d94949c02864ee0be9e4965759e3230e0a8146d79  app/store.py
+7d0db91ea355c94595403adec68b888024b69b7db3cc538586e014a1ad8b4af3  app/service.py
+8624fdd73e4d2adbf71a4257425e47e8f59c9e167720f664e7d0dab6f7ab8d10  app/main.py
+0c57f474ab6a3a2f599e57100d98a255d9c07028a65b9fd324da1f101a155bd4  tests/conftest.py
+b7e4aa89df344aeebfc2b87e3a914404f3674c59c4dd0cd38a7e4b273e694033  tests/test_health.py
+54fb329468ce79892bc91cc954b657baea6f9a1bc52d2b4b1150f735e313e831  tests/test_users.py
+b3d66820ab266446b889a6d81a6e4823f5fc9d1a0c199f6fa1ec70b972b1d128  README.md
+aa46478870d1cd9678aa640a2c479f642a216e3f3972d145a43e3cdefc501bb4  requirements.txt
+----- end -----

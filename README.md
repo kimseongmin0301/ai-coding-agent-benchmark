@@ -79,6 +79,15 @@ pytest -q
 uvicorn app.main:app --reload
 ```
 
+## API 동작 정책
+
+`POST /users`
+
+- 이메일은 대소문자를 구분하지 않고 유일해야 합니다. `alice@example.com`과 `ALICE@example.com`은 같은 이메일로 취급합니다.
+- 이미 등록된 이메일로 생성을 시도하면 `409 Conflict`와 `Email already exists`를 반환합니다.
+- 저장되는 이메일 값은 요청에 담긴 원본 표기를 그대로 유지합니다. 대소문자 무시는 비교에만 적용됩니다.
+- 새 사용자 ID는 사용자 삭제 이후에도 기존 ID와 충돌하지 않도록 생성합니다. 현재 저장된 최대 ID + 1을 사용하며, 기존 사용자를 덮어쓰지 않습니다.
+
 ## Task 002
 
 실제 과제 정의는 아래 문서를 사용합니다.

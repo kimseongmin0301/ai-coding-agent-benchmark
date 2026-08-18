@@ -1,7 +1,13 @@
 from fastapi import FastAPI, HTTPException, status
 
 from app.models import UserCreate, UserResponse
-from app.service import create_user, delete_user, get_user, list_users
+from app.service import (
+    EmailAlreadyExistsError,
+    create_user,
+    delete_user,
+    get_user,
+    list_users,
+)
 
 app = FastAPI(title="AI Coding Agent Benchmark API")
 
@@ -35,7 +41,13 @@ def user(user_id: int) -> dict:
     status_code=status.HTTP_201_CREATED,
 )
 def add_user(payload: UserCreate) -> dict:
-    return create_user(payload.name, payload.email)
+    try:
+        return create_user(payload.name, payload.email)
+    except EmailAlreadyExistsError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already exists",
+        )
 
 
 @app.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
