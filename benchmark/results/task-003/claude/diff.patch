@@ -1,0 +1,211 @@
+diff --git a/README.md b/README.md
+index 103fb02..0a00ef3 100644
+--- a/README.md
++++ b/README.md
+@@ -79,6 +79,37 @@ pytest -q
+ uvicorn app.main:app --reload
+ ```
+ 
++## 사용자 검색 API
++
++```text
++GET /users/search?email=<keyword>
++```
++
++저장된 사용자 중 이메일에 검색어가 포함된 사용자를 반환합니다.
++
++정책:
++
++- `email` query parameter는 필수입니다. 누락하면 `HTTP 422`를 반환합니다.
++- 검색어는 최소 2글자 이상이어야 합니다. 2글자 미만이면 `HTTP 400`과
++  `Search keyword must be at least 2 characters` detail을 반환합니다.
++- 이메일 비교는 대소문자를 구분하지 않는 부분일치입니다.
++  `ALICE`와 `alice`는 같은 결과를 반환하며, `@example`처럼 일부만 입력해도 검색됩니다.
++- 조건을 만족하는 사용자를 모두 반환하며, 기존 저장 순서를 유지합니다.
++- 검색 결과가 없어도 오류가 아닙니다. `HTTP 200`과 빈 배열 `[]`을 반환합니다.
++
++예:
++
++```text
++GET /users/search?email=alice   -> 200 [{"id": 1, "name": "Alice", "email": "alice@example.com"}]
++GET /users/search?email=@example -> 200 [ ... 여러 사용자 ... ]
++GET /users/search?email=nobody  -> 200 []
++GET /users/search?email=a       -> 400 {"detail": "Search keyword must be at least 2 characters"}
++```
++
++`/users/search`는 `/users/{user_id}`보다 먼저 선언되어 있어야 합니다.
++FastAPI는 선언 순서대로 route를 매칭하므로, 순서가 바뀌면 `search`가 `user_id`로 해석되어
++`HTTP 422`가 반환됩니다.
++
+ ## Task 002
+ 
+ 실제 과제 정의는 아래 문서를 사용합니다.
+diff --git a/app/main.py b/app/main.py
+index 7b5b855..4fff731 100644
+--- a/app/main.py
++++ b/app/main.py
+@@ -1,7 +1,13 @@
+ from fastapi import FastAPI, HTTPException, status
+ 
+ from app.models import UserCreate, UserResponse
+-from app.service import create_user, delete_user, get_user, list_users
++from app.service import (
++    create_user,
++    delete_user,
++    get_user,
++    list_users,
++    search_users_by_email,
++)
+ 
+ app = FastAPI(title="AI Coding Agent Benchmark API")
+ 
+@@ -16,6 +22,27 @@ def users() -> list[dict]:
+     return list_users()
+ 
+ 
++MIN_SEARCH_KEYWORD_LENGTH = 2
++
++
++# NOTE:
++# This route must stay declared BEFORE "/users/{user_id}".
++# FastAPI matches routes in declaration order, so if "/users/{user_id}" came
++# first it would capture "/users/search" and fail to parse "search" as an int.
++@app.get("/users/search", response_model=list[UserResponse])
++def search_users(email: str) -> list[dict]:
++    if len(email) < MIN_SEARCH_KEYWORD_LENGTH:
++        raise HTTPException(
++            status_code=status.HTTP_400_BAD_REQUEST,
++            detail=(
++                "Search keyword must be at least "
++                f"{MIN_SEARCH_KEYWORD_LENGTH} characters"
++            ),
++        )
++
++    return search_users_by_email(email)
++
++
+ @app.get("/users/{user_id}", response_model=UserResponse)
+ def user(user_id: int) -> dict:
+     result = get_user(user_id)
+diff --git a/app/service.py b/app/service.py
+index b0ea636..638c756 100644
+--- a/app/service.py
++++ b/app/service.py
+@@ -9,6 +9,22 @@ def get_user(user_id: int) -> dict | None:
+     return get_users().get(user_id)
+ 
+ 
++def search_users_by_email(keyword: str) -> list[dict]:
++    """Return users whose email contains ``keyword``, ignoring case.
++
++    Matching is a case-insensitive substring test. The stored email value is
++    never modified; normalization applies to the comparison only. Users are
++    returned in their existing storage order.
++    """
++    normalized = keyword.lower()
++
++    return [
++        user
++        for user in get_users().values()
++        if normalized in user["email"].lower()
++    ]
++
++
+ def create_user(name: str, email: str) -> dict:
+     users = get_users()
+ 
+diff --git a/tests/test_users.py b/tests/test_users.py
+index 6ebf2ca..aeb7c3b 100644
+--- a/tests/test_users.py
++++ b/tests/test_users.py
+@@ -39,3 +39,90 @@ def test_delete_user(client):
+ 
+     response = client.get("/users/1")
+     assert response.status_code == 404
++
++
++def test_search_users_by_email_returns_matching_user(client):
++    response = client.get("/users/search", params={"email": "alice"})
++
++    assert response.status_code == 200
++    assert response.json() == [
++        {"id": 1, "name": "Alice", "email": "alice@example.com"}
++    ]
++
++
++def test_search_users_by_email_is_case_insensitive(client):
++    upper = client.get("/users/search", params={"email": "ALICE"})
++    lower = client.get("/users/search", params={"email": "alice"})
++
++    assert upper.status_code == 200
++    assert upper.json() == lower.json()
++    assert [user["id"] for user in upper.json()] == [1]
++
++
++def test_search_users_by_email_returns_every_match(client):
++    response = client.get("/users/search", params={"email": "@example"})
++
++    assert response.status_code == 200
++    assert [user["id"] for user in response.json()] == [1, 2]
++
++
++def test_search_users_by_email_returns_empty_list_when_no_match(client):
++    response = client.get("/users/search", params={"email": "nobody"})
++
++    assert response.status_code == 200
++    assert response.json() == []
++
++
++def test_search_users_by_email_rejects_short_keyword(client):
++    response = client.get("/users/search", params={"email": "a"})
++
++    assert response.status_code == 400
++    assert response.json()["detail"] == (
++        "Search keyword must be at least 2 characters"
++    )
++
++
++def test_search_users_by_email_accepts_two_character_keyword(client):
++    response = client.get("/users/search", params={"email": "al"})
++
++    assert response.status_code == 200
++    assert [user["id"] for user in response.json()] == [1]
++
++
++def test_search_users_by_email_requires_the_email_parameter(client):
++    response = client.get("/users/search")
++
++    assert response.status_code == 422
++
++    # The error must be about the missing "email" query parameter, not about
++    # "/users/{user_id}" trying to parse "search" as an int.
++    locations = [detail["loc"] for detail in response.json()["detail"]]
++    assert ["query", "email"] in locations
++
++
++def test_search_route_is_not_captured_by_the_user_id_route(client):
++    # "/users/search" must not be parsed as "/users/{user_id}".
++    # Without the declaration order fix this returns 422 (int_parsing).
++    search = client.get("/users/search", params={"email": "alice"})
++    assert search.status_code == 200
++
++    # Any other non-numeric segment still resolves to /users/{user_id}.
++    assert client.get("/users/abc").status_code == 422
++
++
++def test_existing_user_endpoints_are_unchanged_by_search(client):
++    assert client.get("/health").json() == {"status": "ok"}
++
++    listed = client.get("/users")
++    assert listed.status_code == 200
++    assert len(listed.json()) == 2
++
++    detail = client.get("/users/1")
++    assert detail.status_code == 200
++    assert detail.json() == {
++        "id": 1,
++        "name": "Alice",
++        "email": "alice@example.com",
++    }
++
++    assert client.get("/users/999").status_code == 404

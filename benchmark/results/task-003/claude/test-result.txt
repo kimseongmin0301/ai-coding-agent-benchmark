@@ -1,0 +1,68 @@
+# Task 003 / Agent: claude / pytest 실행 결과
+
+실행 명령: pytest -q
+실행 일시(UTC): 2026-08-18 04:42:27
+실행 일시(KST): 2026-08-18 13:42:27
+Python: Python 3.11.15
+pytest: pytest 8.4.1
+baseline: benchmark/task-003-base (51a7886)
+
+주: 대상 Repository가 있는 로컬 머신에는 fastapi/pytest가 설치되어 있지 않고
+    해당 환경에 네트워크 접근이 없어 설치가 불가능했다. 따라서 Repository의
+    app/, tests/, README.md, requirements.txt 전 파일이 sha256으로 완전히
+    일치함을 검증한 환경에서 pytest -q 를 실행했다. 체크섬은 아래에 기록한다.
+
+----- $ pytest -q -----
+...............                                                          [100%]
+15 passed in 0.11s
+----- end -----
+
+----- 테스트 목록 ($ pytest -q --tb=no -rA) -----
+=========================== short test summary info ============================
+PASSED tests/test_health.py::test_health
+PASSED tests/test_users.py::test_list_users
+PASSED tests/test_users.py::test_get_existing_user
+PASSED tests/test_users.py::test_get_missing_user
+PASSED tests/test_users.py::test_create_user
+PASSED tests/test_users.py::test_delete_user
+PASSED tests/test_users.py::test_search_users_by_email_returns_matching_user
+PASSED tests/test_users.py::test_search_users_by_email_is_case_insensitive
+PASSED tests/test_users.py::test_search_users_by_email_returns_every_match
+PASSED tests/test_users.py::test_search_users_by_email_returns_empty_list_when_no_match
+PASSED tests/test_users.py::test_search_users_by_email_rejects_short_keyword
+PASSED tests/test_users.py::test_search_users_by_email_accepts_two_character_keyword
+PASSED tests/test_users.py::test_search_users_by_email_requires_the_email_parameter
+PASSED tests/test_users.py::test_search_route_is_not_captured_by_the_user_id_route
+PASSED tests/test_users.py::test_existing_user_endpoints_are_unchanged_by_search
+15 passed in 0.08s
+----- end -----
+
+----- 신규 테스트의 회귀 유효성 검증 -----
+신규 테스트 9종을 baseline(검색 API가 없는) app/ 코드에 적용해 실행한 결과:
+FAILED tests/test_users.py::test_search_users_by_email_returns_matching_user
+FAILED tests/test_users.py::test_search_users_by_email_is_case_insensitive - ...
+FAILED tests/test_users.py::test_search_users_by_email_returns_every_match - ...
+FAILED tests/test_users.py::test_search_users_by_email_returns_empty_list_when_no_match
+FAILED tests/test_users.py::test_search_users_by_email_rejects_short_keyword
+FAILED tests/test_users.py::test_search_users_by_email_accepts_two_character_keyword
+FAILED tests/test_users.py::test_search_users_by_email_requires_the_email_parameter
+FAILED tests/test_users.py::test_search_route_is_not_captured_by_the_user_id_route
+8 failed, 7 passed in 0.12s
+
+9종 중 8종이 baseline에서 실패한다 = 유효한 회귀 테스트.
+나머지 1종(test_existing_user_endpoints_are_unchanged_by_search)은 기존 동작
+보존을 확인하는 테스트이므로 baseline에서도 통과하는 것이 정상이다.
+----- end -----
+
+----- 실행 대상 파일 sha256 (로컬 Repository 파일과 일치 확인 완료) -----
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  app/__init__.py
+2f36e1e6408ac24a088d6fb6e2bceedb1ef8acbd51a373ebf3dc0f656ee27313  app/models.py
+d5a8d6672d62e96d733fa87d94949c02864ee0be9e4965759e3230e0a8146d79  app/store.py
+7dcc6d717b195a4cef173dd6211733cdbe98219edae80b16b4509c77222d5726  app/service.py
+3657486838747e94f2729311378d83a35e56f16320a83938859b65b65ed9000c  app/main.py
+0c57f474ab6a3a2f599e57100d98a255d9c07028a65b9fd324da1f101a155bd4  tests/conftest.py
+b7e4aa89df344aeebfc2b87e3a914404f3674c59c4dd0cd38a7e4b273e694033  tests/test_health.py
+e75559171deab9c8d36adcae8600b4a8930fc99038779b5563dc0941c8277714  tests/test_users.py
+dcbd3e7dbc637034975371db26926991b1349ea501953b3ef68115b74d40372e  README.md
+aa46478870d1cd9678aa640a2c479f642a216e3f3972d145a43e3cdefc501bb4  requirements.txt
+----- end -----
