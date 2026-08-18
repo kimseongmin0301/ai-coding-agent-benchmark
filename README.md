@@ -131,19 +131,19 @@ Exploration (탐색) / Analysis (분석)
 이번 실험의 범위는 Task 001~003이므로,
 아래 역할 판단은 **현재까지의 잠정 결론**입니다.
 
-| English Role (영문 역할) | 한글 역할 | 현재 판단 |
-|---|---|---|
-| Researcher (연구자) | 기술 조사 / 리서처 | **Claude 우세** |
-| Requirement Analyst (요구사항 분석가) | 요구사항 분석 | **Claude 우세** |
-| Planner (계획 수립자) | 설계 / 계획 수립 | **특성이 다름 — 단순 우열 보류** |
-| Coder (코더) | 구현 / 개발 | **Codex 근소 우세** |
-| Fast Fix Agent (빠른 수정 에이전트) | 빠른 수정 / 패치 | **Codex 우세** |
-| Tester (테스터) | 테스트 작성 / 검증 | **실질 동급, 스타일 차이** |
-| Deep Validator (심층 검증자) | 심층 검증 | **Claude 성향 강함** |
-| Technical Writer (기술 문서 작성자) | 기술 문서 작성 | **Claude 우세** |
-| Concise Reporter (간결한 보고자) | 간결한 결과 요약 | **Codex 우세** |
-| Reviewer (리뷰어) | 코드 리뷰 | **판단 보류** |
-| Debugger (디버거) | 디버깅 / 원인 분석 | **판단 보류** |
+| 역할 | 현재 판단 |
+|---|---|
+| Researcher (기술 조사 / 리서처) | **Claude 우세** |
+| Requirement Analyst (요구사항 분석가) | **Claude 우세** |
+| Planner (설계 / 계획 수립자) | **특성이 다름 — 단순 우열 보류** |
+| Coder (구현 / 개발자) | **Codex 근소 우세** |
+| Fast Fix Agent (빠른 수정 / 패치 에이전트) | **Codex 우세** |
+| Tester (테스트 작성 / 검증자) | **실질 동급, 스타일 차이** |
+| Deep Validator (심층 검증자) | **Claude 성향 강함** |
+| Technical Writer (기술 문서 작성자) | **Claude 우세** |
+| Concise Reporter (간결한 결과 보고자) | **Codex 우세** |
+| Reviewer (코드 리뷰어) | **판단 보류** |
+| Debugger (디버깅 / 원인 분석가) | **판단 보류** |
 
 ## 역할별 해석
 
@@ -261,6 +261,25 @@ Cross Evaluation (교차 평가)
 
 각 Agent(에이전트)는 상대 Agent(에이전트)의 결과를 보지 않은 상태에서 독립적으로 작업했습니다.
 
+이후 비교 평가 단계에서는 각 평가자가 **자신의 결과물과 상대 Agent(에이전트)의 결과물을 모두 확인한 뒤**,
+동일한 평가 기준으로 두 결과를 함께 판단했습니다.
+
+즉, 실험은 다음 순서로 진행했습니다.
+
+```text
+1차 결과 작성
+→ Codex와 Claude가 서로의 결과를 보지 않고 독립 수행
+
+결과물 교환
+→ Codex 결과와 Claude 결과를 모두 평가 입력으로 제공
+
+상호 평가
+→ 각 평가자가 자기 결과와 상대 결과를 같은 기준으로 비교
+
+종합 판단
+→ 두 평가자의 평가 결과를 함께 확인해 최종 해석
+```
+
 작업 결과는 다음과 같이 분리했습니다.
 
 ```text
@@ -277,6 +296,8 @@ benchmark/results/
 ```
 
 평가 역시 독립적으로 수행했습니다.
+각 평가자는 자신의 평가가 완료되기 전까지 상대 평가자의 평가 파일을 보지 않았고,
+평가 시에는 자기 Agent 결과와 상대 Agent 결과를 모두 직접 확인했습니다.
 
 ```text
 benchmark/evaluations/
