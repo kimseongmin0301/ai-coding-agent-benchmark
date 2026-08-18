@@ -16,11 +16,14 @@ Codex CLI와 Claude Code를 동일한 Repository(저장소), 동일한 요구사
 이번 비교는 다음 설정을 기준으로 수행했습니다.
 
 ```text
-Codex : 5.5 medium
-Claude: Opus 5 high
+작업 계획과 프롬프트: GPT 5.6 Sol medium
+Codex 실행 Agent     : Codex 5.5 medium
+Claude 실행 Agent    : Claude Opus 5 high
 ```
 
 따라서 본 README의 결론은 위 모델/추론 설정 조합에서 관찰된 결과입니다.
+즉, Task 정의와 실행 프롬프트를 구성하는 단계는 GPT 5.6 Sol medium을 사용했고,
+그 프롬프트를 실제 Repository에서 수행한 Coding Agent(코딩 에이전트)를 Codex 5.5 medium과 Claude Opus 5 high로 비교했습니다.
 다른 모델 버전이나 reasoning level(추론 수준)을 사용하면 속도와 품질 결과가 달라질 수 있습니다.
 
 ---
