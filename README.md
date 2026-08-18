@@ -88,3 +88,30 @@ benchmark/task-002.md
 ```
 
 두 Agent에게 **같은 파일, 같은 Issue, 같은 초기 commit**을 제공해야 합니다.
+
+### 사용자 생성 정책
+
+- `POST /users`의 이메일은 대소문자를 구분하지 않고 고유해야 합니다.
+- 이미 등록된 이메일로 사용자를 생성하면 `HTTP 409 Conflict`와 `Email already exists` detail을 반환합니다.
+- 사용자를 삭제한 뒤 새 사용자를 생성해도 기존 사용자 ID와 충돌하지 않는 ID를 발급합니다.
+
+## Task 003
+
+실제 과제 정의는 아래 문서를 사용합니다.
+
+```text
+benchmark/task-003.md
+```
+
+### 사용자 검색 API
+
+```text
+GET /users/search?email=<keyword>
+```
+
+정책:
+
+- `email` query parameter는 필수입니다.
+- 검색어는 최소 2글자 이상이어야 합니다.
+- 이메일 검색은 대소문자를 구분하지 않는 부분일치 방식입니다.
+- 검색 결과가 없으면 `HTTP 200 OK`와 빈 배열 `[]`를 반환합니다.
