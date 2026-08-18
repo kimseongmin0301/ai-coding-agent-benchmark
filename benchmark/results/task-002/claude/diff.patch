@@ -1,0 +1,195 @@
+diff --git a/README.md b/README.md
+index 103fb02..7fab42a 100644
+--- a/README.md
++++ b/README.md
+@@ -79,6 +79,15 @@ pytest -q
+ uvicorn app.main:app --reload
+ ```
+ 
++## API 동작 정책
++
++`POST /users`
++
++- 이메일은 대소문자를 구분하지 않고 유일해야 합니다. `alice@example.com`과 `ALICE@example.com`은 같은 이메일로 취급합니다.
++- 이미 등록된 이메일로 생성을 시도하면 `409 Conflict`와 `Email already exists`를 반환합니다.
++- 저장되는 이메일 값은 요청에 담긴 원본 표기를 그대로 유지합니다. 대소문자 무시는 비교에만 적용됩니다.
++- 새 사용자 ID는 사용자 삭제 이후에도 기존 ID와 충돌하지 않도록 생성합니다. 현재 저장된 최대 ID + 1을 사용하며, 기존 사용자를 덮어쓰지 않습니다.
++
+ ## Task 002
+ 
+ 실제 과제 정의는 아래 문서를 사용합니다.
+diff --git a/app/main.py b/app/main.py
+index 7b5b855..63c0074 100644
+--- a/app/main.py
++++ b/app/main.py
+@@ -1,7 +1,13 @@
+ from fastapi import FastAPI, HTTPException, status
+ 
+ from app.models import UserCreate, UserResponse
+-from app.service import create_user, delete_user, get_user, list_users
++from app.service import (
++    EmailAlreadyExistsError,
++    create_user,
++    delete_user,
++    get_user,
++    list_users,
++)
+ 
+ app = FastAPI(title="AI Coding Agent Benchmark API")
+ 
+@@ -35,7 +41,13 @@ def user(user_id: int) -> dict:
+     status_code=status.HTTP_201_CREATED,
+ )
+ def add_user(payload: UserCreate) -> dict:
+-    return create_user(payload.name, payload.email)
++    try:
++        return create_user(payload.name, payload.email)
++    except EmailAlreadyExistsError:
++        raise HTTPException(
++            status_code=status.HTTP_409_CONFLICT,
++            detail="Email already exists",
++        )
+ 
+ 
+ @app.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+diff --git a/app/service.py b/app/service.py
+index b0ea636..f98fa18 100644
+--- a/app/service.py
++++ b/app/service.py
+@@ -1,6 +1,19 @@
+ from app.store import get_users
+ 
+ 
++class EmailAlreadyExistsError(Exception):
++    """Raised when a user is created with an email that is already registered."""
++
++
++def normalize_email(email: str) -> str:
++    """Return the comparison key of an email address.
++
++    Email uniqueness is case-insensitive, so comparisons are made on the
++    normalized value. The value stored on the user is left untouched.
++    """
++    return email.strip().lower()
++
++
+ def list_users() -> list[dict]:
+     return list(get_users().values())
+ 
+@@ -9,13 +22,35 @@ def get_user(user_id: int) -> dict | None:
+     return get_users().get(user_id)
+ 
+ 
++def find_user_by_email(email: str) -> dict | None:
++    key = normalize_email(email)
++
++    for user in get_users().values():
++        if normalize_email(user["email"]) == key:
++            return user
++
++    return None
++
++
++def next_user_id() -> int:
++    users = get_users()
++
++    # IDs are derived from the highest ID currently stored rather than from
++    # the number of stored users, so a deletion can never make the next ID
++    # collide with (and overwrite) an existing user.
++    if not users:
++        return 1
++
++    return max(users) + 1
++
++
+ def create_user(name: str, email: str) -> dict:
+     users = get_users()
+ 
+-    # NOTE:
+-    # The current ID generation logic is intentionally simplistic.
+-    # Task 002 requires the agent to inspect whether this is safe.
+-    new_id = len(users) + 1
++    if find_user_by_email(email) is not None:
++        raise EmailAlreadyExistsError(email)
++
++    new_id = next_user_id()
+ 
+     user = {
+         "id": new_id,
+diff --git a/tests/test_users.py b/tests/test_users.py
+index 6ebf2ca..27e3d5a 100644
+--- a/tests/test_users.py
++++ b/tests/test_users.py
+@@ -39,3 +39,72 @@ def test_delete_user(client):
+ 
+     response = client.get("/users/1")
+     assert response.status_code == 404
++
++
++def test_create_user_with_duplicate_email_returns_409(client):
++    response = client.post(
++        "/users",
++        json={"name": "Alice Clone", "email": "alice@example.com"},
++    )
++
++    assert response.status_code == 409
++    assert response.json()["detail"] == "Email already exists"
++
++    # the rejected request must not add or modify anything
++    assert len(client.get("/users").json()) == 2
++    assert client.get("/users/1").json()["name"] == "Alice"
++
++
++def test_create_user_with_duplicate_email_ignores_case(client):
++    response = client.post(
++        "/users",
++        json={"name": "Alice Clone", "email": "ALICE@example.com"},
++    )
++
++    assert response.status_code == 409
++    assert response.json()["detail"] == "Email already exists"
++    assert len(client.get("/users").json()) == 2
++
++
++def test_create_user_after_delete_does_not_reuse_existing_id(client):
++    assert client.delete("/users/1").status_code == 204
++
++    response = client.post(
++        "/users",
++        json={"name": "Charlie", "email": "charlie@example.com"},
++    )
++
++    assert response.status_code == 201
++    assert response.json()["id"] not in (1, 2)
++
++    # the surviving user must not be overwritten
++    assert client.get("/users/2").json() == {
++        "id": 2,
++        "name": "Bob",
++        "email": "bob@example.com",
++    }
++    assert len(client.get("/users").json()) == 2
++
++
++def test_create_user_with_new_email_returns_201(client):
++    response = client.post(
++        "/users",
++        json={"name": "Dana", "email": "dana@example.com"},
++    )
++
++    assert response.status_code == 201
++
++    body = response.json()
++    assert body["name"] == "Dana"
++    assert body["email"] == "dana@example.com"
++    assert client.get(f"/users/{body['id']}").status_code == 200
++
++
++def test_create_user_preserves_email_casing(client):
++    response = client.post(
++        "/users",
++        json={"name": "Erin", "email": "Erin@Example.com"},
++    )
++
++    assert response.status_code == 201
++    assert response.json()["email"] == "Erin@Example.com"
