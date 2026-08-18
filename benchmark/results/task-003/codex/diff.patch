@@ -1,0 +1,224 @@
+--- a/README.md
++++ b/README.md
+@@ -88,3 +88,30 @@
+ ```
+ 
+ 두 Agent에게 **같은 파일, 같은 Issue, 같은 초기 commit**을 제공해야 합니다.
++
++### 사용자 생성 정책
++
++- `POST /users`의 이메일은 대소문자를 구분하지 않고 고유해야 합니다.
++- 이미 등록된 이메일로 사용자를 생성하면 `HTTP 409 Conflict`와 `Email already exists` detail을 반환합니다.
++- 사용자를 삭제한 뒤 새 사용자를 생성해도 기존 사용자 ID와 충돌하지 않는 ID를 발급합니다.
++
++## Task 003
++
++실제 과제 정의는 아래 문서를 사용합니다.
++
++```text
++benchmark/task-003.md
++```
++
++### 사용자 검색 API
++
++```text
++GET /users/search?email=<keyword>
++```
++
++정책:
++
++- `email` query parameter는 필수입니다.
++- 검색어는 최소 2글자 이상이어야 합니다.
++- 이메일 검색은 대소문자를 구분하지 않는 부분일치 방식입니다.
++- 검색 결과가 없으면 `HTTP 200 OK`와 빈 배열 `[]`를 반환합니다.
+--- a/app/main.py
++++ b/app/main.py
+@@ -1,7 +1,14 @@
+ from fastapi import FastAPI, HTTPException, status
+ 
+ from app.models import UserCreate, UserResponse
+-from app.service import create_user, delete_user, get_user, list_users
++from app.service import (
++    DuplicateEmailError,
++    create_user,
++    delete_user,
++    get_user,
++    list_users,
++    search_users_by_email,
++)
+ 
+ app = FastAPI(title="AI Coding Agent Benchmark API")
+ 
+@@ -14,6 +21,17 @@
+ @app.get("/users", response_model=list[UserResponse])
+ def users() -> list[dict]:
+     return list_users()
++
++
++@app.get("/users/search", response_model=list[UserResponse])
++def search_users(email: str) -> list[dict]:
++    if len(email) < 2:
++        raise HTTPException(
++            status_code=status.HTTP_400_BAD_REQUEST,
++            detail="Search keyword must be at least 2 characters",
++        )
++
++    return search_users_by_email(email)
+ 
+ 
+ @app.get("/users/{user_id}", response_model=UserResponse)
+@@ -35,7 +53,13 @@
+     status_code=status.HTTP_201_CREATED,
+ )
+ def add_user(payload: UserCreate) -> dict:
+-    return create_user(payload.name, payload.email)
++    try:
++        return create_user(payload.name, payload.email)
++    except DuplicateEmailError as exc:
++        raise HTTPException(
++            status_code=status.HTTP_409_CONFLICT,
++            detail=str(exc),
++        ) from exc
+ 
+ 
+ @app.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+--- a/app/service.py
++++ b/app/service.py
+@@ -1,4 +1,12 @@
+ from app.store import get_users
++
++
++class DuplicateEmailError(ValueError):
++    pass
++
++
++def _normalize_email(value: str) -> str:
++    return value.casefold()
+ 
+ 
+ def list_users() -> list[dict]:
+@@ -9,13 +17,23 @@
+     return get_users().get(user_id)
+ 
+ 
++def search_users_by_email(keyword: str) -> list[dict]:
++    normalized_keyword = _normalize_email(keyword)
++    return [
++        user
++        for user in get_users().values()
++        if normalized_keyword in _normalize_email(user["email"])
++    ]
++
++
+ def create_user(name: str, email: str) -> dict:
+     users = get_users()
+ 
+-    # NOTE:
+-    # The current ID generation logic is intentionally simplistic.
+-    # Task 002 requires the agent to inspect whether this is safe.
+-    new_id = len(users) + 1
++    normalized_email = _normalize_email(email)
++    if any(_normalize_email(user["email"]) == normalized_email for user in users.values()):
++        raise DuplicateEmailError("Email already exists")
++
++    new_id = max(users.keys(), default=0) + 1
+ 
+     user = {
+         "id": new_id,
+--- a/tests/test_users.py
++++ b/tests/test_users.py
+@@ -32,6 +32,94 @@
+     }
+ 
+ 
++def test_create_user_rejects_duplicate_email(client):
++    response = client.post(
++        "/users",
++        json={"name": "Alice Copy", "email": "alice@example.com"},
++    )
++
++    assert response.status_code == 409
++    assert response.json()["detail"] == "Email already exists"
++
++
++def test_create_user_rejects_duplicate_email_case_insensitive(client):
++    response = client.post(
++        "/users",
++        json={"name": "Alice Upper", "email": "ALICE@example.com"},
++    )
++
++    assert response.status_code == 409
++    assert response.json()["detail"] == "Email already exists"
++
++
++def test_create_user_after_delete_does_not_reuse_existing_id(client):
++    delete_response = client.delete("/users/1")
++    assert delete_response.status_code == 204
++
++    create_response = client.post(
++        "/users",
++        json={"name": "Charlie", "email": "charlie@example.com"},
++    )
++
++    assert create_response.status_code == 201
++    assert create_response.json()["id"] == 3
++
++    existing_response = client.get("/users/2")
++    assert existing_response.status_code == 200
++    assert existing_response.json()["email"] == "bob@example.com"
++
++
++def test_search_users_by_email_partial_match(client):
++    response = client.get("/users/search", params={"email": "alice"})
++
++    assert response.status_code == 200
++    assert response.json() == [
++        {"id": 1, "name": "Alice", "email": "alice@example.com"}
++    ]
++
++
++def test_search_users_by_email_case_insensitive(client):
++    response = client.get("/users/search", params={"email": "ALICE"})
++
++    assert response.status_code == 200
++    assert response.json() == [
++        {"id": 1, "name": "Alice", "email": "alice@example.com"}
++    ]
++
++
++def test_search_users_by_email_returns_multiple_users(client):
++    response = client.get("/users/search", params={"email": "@example"})
++
++    assert response.status_code == 200
++    assert response.json() == [
++        {"id": 1, "name": "Alice", "email": "alice@example.com"},
++        {"id": 2, "name": "Bob", "email": "bob@example.com"},
++    ]
++
++
++def test_search_users_by_email_returns_empty_list(client):
++    response = client.get("/users/search", params={"email": "missing"})
++
++    assert response.status_code == 200
++    assert response.json() == []
++
++
++def test_search_users_by_email_rejects_one_character_keyword(client):
++    response = client.get("/users/search", params={"email": "a"})
++
++    assert response.status_code == 400
++    assert response.json()["detail"] == "Search keyword must be at least 2 characters"
++
++
++def test_search_users_by_email_accepts_two_character_keyword(client):
++    response = client.get("/users/search", params={"email": "bo"})
++
++    assert response.status_code == 200
++    assert response.json() == [
++        {"id": 2, "name": "Bob", "email": "bob@example.com"}
++    ]
++
++
+ def test_delete_user(client):
+     response = client.delete("/users/1")
+ 
