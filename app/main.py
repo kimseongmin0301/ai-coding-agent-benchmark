@@ -1,7 +1,13 @@
 from fastapi import FastAPI, HTTPException, status
 
 from app.models import UserCreate, UserResponse
-from app.service import create_user, delete_user, get_user, list_users
+from app.service import (
+    create_user,
+    delete_user,
+    get_user,
+    list_users,
+    search_users_by_email,
+)
 
 app = FastAPI(title="AI Coding Agent Benchmark API")
 
@@ -14,6 +20,27 @@ def health() -> dict:
 @app.get("/users", response_model=list[UserResponse])
 def users() -> list[dict]:
     return list_users()
+
+
+MIN_SEARCH_KEYWORD_LENGTH = 2
+
+
+# NOTE:
+# This route must stay declared BEFORE "/users/{user_id}".
+# FastAPI matches routes in declaration order, so if "/users/{user_id}" came
+# first it would capture "/users/search" and fail to parse "search" as an int.
+@app.get("/users/search", response_model=list[UserResponse])
+def search_users(email: str) -> list[dict]:
+    if len(email) < MIN_SEARCH_KEYWORD_LENGTH:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Search keyword must be at least "
+                f"{MIN_SEARCH_KEYWORD_LENGTH} characters"
+            ),
+        )
+
+    return search_users_by_email(email)
 
 
 @app.get("/users/{user_id}", response_model=UserResponse)

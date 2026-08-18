@@ -9,6 +9,22 @@ def get_user(user_id: int) -> dict | None:
     return get_users().get(user_id)
 
 
+def search_users_by_email(keyword: str) -> list[dict]:
+    """Return users whose email contains ``keyword``, ignoring case.
+
+    Matching is a case-insensitive substring test. The stored email value is
+    never modified; normalization applies to the comparison only. Users are
+    returned in their existing storage order.
+    """
+    normalized = keyword.lower()
+
+    return [
+        user
+        for user in get_users().values()
+        if normalized in user["email"].lower()
+    ]
+
+
 def create_user(name: str, email: str) -> dict:
     users = get_users()
 

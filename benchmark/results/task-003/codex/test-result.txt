@@ -1,0 +1,10 @@
+Command:
+pytest -q
+
+Environment:
+PYTHONPATH=C:\seongmin\ai-agent\ai-coding-agent-benchmark
+PATH included C:\Users\SAMSUNG\AppData\Local\Programs\Python\Python312\Scripts
+
+Output:
+...............                                                          [100%]
+15 passed in 0.18s
