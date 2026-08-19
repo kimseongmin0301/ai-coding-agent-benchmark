@@ -1,36 +1,57 @@
-# AI Coding Agent Benchmark (AI 코딩 에이전트 벤치마크)
-### Codex CLI vs Claude Code (Codex CLI와 Claude Code 비교)
+# AI Coding Agent Benchmark
+### Codex CLI vs Claude Code — 개발 업무별 Coding Agent 비교 실험
 
-Codex CLI와 Claude Code를 동일한 Repository(저장소), 동일한 요구사항, 동일한 baseline(기준 상태)에서 비교한 실험 프로젝트입니다.
-
-단순히 “어느 모델이 더 좋은가?”를 비교하는 것이 아니라,
-
-> **어떤 개발 업무에서 어떤 Coding Agent(코딩 에이전트)를 사용하는 것이 더 적합한가?**
-
-를 확인하는 것을 목표로 했습니다.
+Codex CLI와 Claude Code를 동일한 Repository(저장소), 동일한 요구사항, 동일한 baseline(기준 상태)에서 독립적으로 실행해 **개발 업무의 성격에 따라 어떤 Coding Agent(코딩 에이전트)가 더 적합한지** 비교한 실험 프로젝트입니다.
 
 ---
 
-# 실험 비교 조건
+# 결론 (Conclusion)
 
-이번 비교는 다음 설정을 기준으로 수행했습니다.
+이번 실험의 결론은 **“Codex와 Claude 중 누가 더 좋은가?”**가 아니었습니다.
+
+3개의 Task를 수행하면서 두 Agent가 서로 다른 강점을 보였습니다.
+
+| Task | 평가 대상 | 결과 |
+|---|---|---|
+| Task 001 | Research(조사) / Strategy(전략) / Documentation(문서화) | **Claude 우세** |
+| Task 002 | Bug Fix(버그 수정) / Implementation(구현) / Test(테스트) | **실질 동급** |
+| Task 003 | Planning(계획) / Feature Development(기능 개발) | **Codex 우세** |
+
+가장 단순하게 정리하면 다음과 같습니다.
 
 ```text
-작업 계획과 프롬프트: GPT 5.6 Sol medium
-Codex 실행 Agent     : Codex 5.5 medium
-Claude 실행 Agent    : Claude Opus 5 high
+무엇을 만들어야 하는지가 비교적 명확함
+→ Codex
+
+무엇을 만들어야 하는지부터 분석해야 함
+→ Claude
 ```
 
-따라서 본 README의 결론은 위 모델/추론 설정 조합에서 관찰된 결과입니다.
-즉, Task 정의와 실행 프롬프트를 구성하는 단계는 GPT 5.6 Sol medium을 사용했고,
-그 프롬프트를 실제 Repository에서 수행한 Coding Agent(코딩 에이전트)를 Codex 5.5 medium과 Claude Opus 5 high로 비교했습니다.
-다른 모델 버전이나 reasoning level(추론 수준)을 사용하면 속도와 품질 결과가 달라질 수 있습니다.
+개발 역할의 관점에서는 다음처럼 볼 수 있었습니다.
+
+```text
+Execution (실행 / 구현)
+→ Codex
+
+Exploration / Analysis (탐색 / 분석)
+→ Claude
+```
+
+또한 실험 과정에서 **Codex가 Claude보다 훨씬 빠르게 작업을 완료하는 경향**을 체감했습니다.
+
+다만 모든 Task의 시작/종료 시간을 동일한 방식으로 자동 측정하지 않았기 때문에 이는 정확한 wall-clock benchmark(실제 경과 시간 벤치마크)가 아니라 **정성적 관찰 결과**로 기록합니다.
+
+이번 연구에서 얻은 가장 중요한 결론은 다음과 같습니다.
+
+> **한 Agent를 모든 개발 업무에 사용하는 것보다, 작업의 성격에 따라 Agent를 선택하는 것이 더 합리적이다.**
+
+다만 이 결론은 이번 3개 Task와 사용한 모델/추론 설정에서 관찰한 결과이며, 일반적인 모델 순위를 의미하지 않습니다.
 
 ---
 
 # 연구 배경 (Why This Study)
 
-AI Coding Agent(코딩 에이전트)를 실제 개발에 사용하면서 단순히
+AI Coding Agent를 실제 개발에 활용하면서 단순히
 
 > **“어느 모델이 더 좋은가?”**
 
@@ -40,31 +61,25 @@ AI Coding Agent(코딩 에이전트)를 실제 개발에 사용하면서 단순�
 
 가 더 중요한 질문이라고 생각했습니다.
 
-Codex CLI와 Claude Code 모두 코드 작성, 테스트, 분석, 문서화까지 수행할 수 있지만,
-실제로 사용해보면 작업 방식에는 분명한 차이가 있었습니다.
-
-예를 들면 다음과 같습니다.
+Codex CLI와 Claude Code 모두 코드 작성, 테스트, 분석, 문서화 등을 수행할 수 있지만 실제 사용 과정에서는 다음과 같은 차이가 나타났습니다.
 
 ```text
 요구사항을 해석하는 방식
 문제를 분석하는 깊이
 구현을 시작하기까지의 과정
-테스트를 작성하고 검증하는 방식
-변경 범위를 관리하는 방식
+테스트 및 검증 방식
+변경 범위 관리
 문서화의 상세도
 실제 작업 속도
 ```
 
-하지만 이런 차이를 단순한 체감이나 개인적인 선호만으로 판단하고 싶지는 않았습니다.
+하지만 이러한 차이를 개인적인 체감만으로 판단하고 싶지는 않았습니다.
 
 그래서 다음 질문에서 이 실험을 시작했습니다.
 
-> **동일한 Repository(저장소), 동일한 요구사항, 동일한 baseline(기준 상태)에서  
-> Codex와 Claude Code를 각각 독립적으로 실행하면 실제 결과는 어떻게 달라질까?**
+> **동일한 Repository, 동일한 요구사항, 동일한 baseline에서 Codex와 Claude Code를 각각 독립적으로 실행하면 실제 결과는 어떻게 달라질까?**
 
 이번 Benchmark(벤치마크 / 비교 실험)에서는 단순히 최종 코드가 동작하는지만 비교하지 않았습니다.
-
-다음 요소를 함께 확인했습니다.
 
 ```text
 Requirement Understanding (요구사항 이해)
@@ -76,287 +91,85 @@ Documentation (문서화)
 Efficiency (작업 효율)
 ```
 
-또한 한 Agent가 모든 영역에서 우수하다는 결론을 미리 정하지 않았습니다.
+를 함께 확인했습니다.
 
-이번 연구의 목적은 단순한 Winner(승자) 선정이 아니라,
+즉 연구 목적은 단순한 Winner(승자) 선정이 아니라,
 
 ```text
 Codex vs Claude
         ↓
 실제 작업 방식 비교
         ↓
-각 Agent의 상대적인 강점 / 약점 확인
+상대적인 강점 / 약점 확인
         ↓
-개발 Workflow(작업 흐름)에서의 적절한 활용 방법 탐색
+개발 Workflow에서의 적절한 활용 방법 탐색
 ```
 
-에 더 가까웠습니다.
+이었습니다.
 
-## 이번 연구에서 확인하고 싶었던 질문
+---
 
-1. 동일한 요구사항을 주었을 때 두 Agent의 결과물은 얼마나 달라지는가?
-2. 실제 코드 구현 능력에는 의미 있는 차이가 있는가?
-3. 요구사항이 모호하거나 baseline과 충돌할 때 각 Agent는 어떻게 판단하는가?
+# 실험 비교 조건
+
+이번 비교는 다음 설정을 기준으로 수행했습니다.
+
+```text
+작업 계획과 프롬프트 : GPT-5.6 Sol Medium
+Codex 실행 Agent      : Codex 5.5 Medium
+Claude 실행 Agent     : Claude Opus 5 High
+```
+
+Task 정의와 실행 프롬프트는 GPT-5.6 Sol Medium으로 구성했고, 실제 Repository에서 해당 Task를 수행하는 Agent로 Codex와 Claude를 비교했습니다.
+
+따라서 모델 버전이나 reasoning level(추론 수준)이 달라지면 결과도 달라질 수 있습니다.
+
+---
+
+# 연구 질문 (Research Questions)
+
+이번 실험에서는 다음 질문을 확인하고자 했습니다.
+
+1. 동일한 요구사항에서 두 Agent의 결과물은 얼마나 달라지는가?
+2. 실제 구현 능력에는 의미 있는 차이가 있는가?
+3. 요구사항이 모호하거나 baseline과 충돌할 때 어떻게 판단하는가?
 4. 테스트 작성과 검증 방식에는 어떤 차이가 있는가?
-5. 더 깊고 상세한 분석이 항상 더 좋은 구현 결과로 이어지는가?
-6. 속도와 결과 품질 사이에는 어떤 차이가 있는가?
-7. 실제 개발 과정에서는 각 Agent를 어떤 역할에 배치하는 것이 적절한가?
+5. 깊은 분석이 항상 더 완전한 구현으로 이어지는가?
+6. 작업 속도와 결과 품질 사이에는 어떤 차이가 있는가?
+7. 실제 개발에서는 각 Agent를 어떤 역할에 배치하는 것이 적절한가?
 
 ---
 
-# 결론부터
+# 실험 방식 (Method)
 
-이번 실험에서 가장 크게 체감된 차이는 **속도**였습니다.
-
-**Codex 5.5 medium이 Claude Opus 5 high보다 훨씬 빠르게 작업을 완료했습니다.**
-
-다만 모든 Task에서 시작/종료 시각을 동일한 방식으로 자동 계측하지 않았기 때문에,
-이를 정확한 wall-clock benchmark(실제 경과 시간 벤치마크) 수치로 주장하지는 않습니다.
-
-따라서 속도에 대해서는 다음과 같이 구분합니다.
-
-```text
-정량적으로 기록된 항목
-- 테스트 실행 횟수
-- 수정 파일 수
-- 추가/삭제 라인 수
-- 평가 점수
-
-정성적 관찰
-- 실제 작업 과정에서 Codex가 Claude보다 훨씬 빠르게 결과를 완성함
-```
-
-Task 003에서는 수정 파일 수와 추가 라인 수가 거의 동일했지만,
-Codex는 테스트 실행 횟수가 더 적었고 두 평가자 모두 **품질 대비 실행 효율은 Codex 우세**로 판단했습니다.
-
----
-
-# 전체 결과 요약
-
-| Task (과제) | 평가 대상 | 결과 |
-|---|---|---|
-| Task 001 | Research(조사) / Strategy(전략) / Documentation(문서화) | **Claude 우세** |
-| Task 002 | Bug Fix(버그 수정) / Implementation(구현) / Test(테스트) | **실질 동급** |
-| Task 003 | Planning(계획) / Feature Development(기능 개발) | **Codex 우세** |
-
-## 가장 단순하게 정리하면
-
-```text
-명확한 문제
-→ Codex
-
-모호한 문제 / 조사 / 깊은 검토
-→ Claude
-```
-
-또는 개발 관점에서는 다음과 같이 정리할 수 있습니다.
-
-```text
-Execution (실행)
-→ Codex
-
-Exploration (탐색) / Analysis (분석)
-→ Claude
-```
-
----
-
-# 그래서 어떻게 사용할 것인가?
-
-실험 결과, 두 Agent(에이전트)를 동일한 용도로 사용하는 것보다
-**업무 성격에 따라 선택하는 것이 더 효율적**이라고 판단했습니다.
-
-## Codex를 우선 사용할 작업
-
-### 구현 / Coding (코딩)
-
-- 명확한 요구사항의 기능 구현
-- 작은 버그 수정
-- 빠른 코드 변경
-- 기존 코드에 최소 patch(패치) 적용
-- 반복적인 개발 작업
-- 테스트가 이미 존재하는 작업
-- 구현 속도가 중요한 작업
-
-한 줄로 정리하면:
-
-> **무엇을 만들어야 하는지가 비교적 명확하다면 Codex**
-
----
-
-## Claude를 우선 사용할 작업
-
-### 조사 / 분석 / 검토
-
-- 구현 전 요구사항 분석
-- 여러 설계 대안 비교
-- 기술 조사
-- 위험 요소 탐색
-- 테스트 케이스 확장
-- 상세한 설계 문서 작성
-- 코드 변경에 대한 깊은 검토
-
-한 줄로 정리하면:
-
-> **무엇을 만들어야 하는지부터 고민해야 한다면 Claude**
-
----
-
-# 역할별 활용 판단
-
-이번 실험의 범위는 Task 001~003이므로,
-아래 역할 판단은 **현재까지의 잠정 결론**입니다.
-
-| 역할 | 현재 판단 |
-|---|---|
-| Researcher (기술 조사 / 리서처) | **Claude 우세** |
-| Requirement Analyst (요구사항 분석가) | **Claude 우세** |
-| Planner (설계 / 계획 수립자) | **특성이 다름 — 단순 우열 보류** |
-| Coder (구현 / 개발자) | **Codex 근소 우세** |
-| Fast Fix Agent (빠른 수정 / 패치 에이전트) | **Codex 우세** |
-| Tester (테스트 작성 / 검증자) | **실질 동급, 스타일 차이** |
-| Deep Validator (심층 검증자) | **Claude 성향 강함** |
-| Technical Writer (기술 문서 작성자) | **Claude 우세** |
-| Concise Reporter (간결한 결과 보고자) | **Codex 우세** |
-| Reviewer (코드 리뷰어) | **판단 보류** |
-| Debugger (디버깅 / 원인 분석가) | **판단 보류** |
-
-## 역할별 해석
-
-### Researcher (연구자) — 기술 조사 / 리서처
-
-Claude가 더 강했습니다.
-
-Task 001에서 공식 문서 기반의 세부 기능, 권한, Sandbox(샌드박스), Hook(훅), 설정 방식 등을 더 깊게 조사했고,
-불확실한 항목을 명확히 구분하는 경향을 보였습니다.
-
----
-
-### Requirement Analyst (요구사항 분석가) — 요구사항 분석
-
-Claude가 더 깊게 분석하는 경향이 있었습니다.
-
-특히 Task 003에서 baseline과 요구사항 문서의 불일치를 발견하고,
-그 원인을 상세히 추적했습니다.
-
-다만 최종 요구사항 해석에서는 Codex가 더 완결된 결과를 만든 사례도 있었기 때문에,
-**깊은 분석 = 항상 더 정확한 최종 판단**은 아니라는 점도 확인했습니다.
-
----
-
-### Planner (계획 수립자) — 설계 / 계획 수립
-
-단순히 Claude 우세라고 보기는 어렵습니다.
-
-Task 003에서 Claude의 계획은 훨씬 상세했고
-대안 비교와 위험 분석도 더 많았습니다.
-
-반면 Codex의 계획은 더 짧았지만,
-불확실한 상황을 조건부 계획으로 흡수해 실제 구현에서 요구사항 전체를 만족했습니다.
-
-즉,
-
-```text
-Claude
-→ 계획의 깊이
-
-Codex
-→ 계획의 간결성 + 실행 연결
-```
-
-이라는 차이가 있었습니다.
-
----
-
-### Coder (코더) — 구현 / 개발
-
-현재까지는 **Codex 근소 우세**로 판단합니다.
-
-Task 002에서는 두 Agent의 구현 능력이 실질적으로 동급이었고,
-Task 003에서도 검색 API 자체만 보면 큰 차이가 없었습니다.
-
-그러나 Codex는 Task 003에서 문서 전체의 요구사항을 최종 결과물에 더 완결적으로 반영했고,
-변경량 대비 기능 완결성도 높았습니다.
-
----
-
-### Tester (테스터) — 테스트 작성 / 검증
-
-Task 002에서는 Claude가 더 많은 테스트와 부작용 검증을 추가했습니다.
-
-Task 003에서는 Codex가 body 검증과 Task 002 회귀를 더 강하게 잡았고,
-Claude는 route collision(라우트 충돌)과 query parameter(쿼리 파라미터) 누락 등 구조적인 위험을 더 넓게 확인했습니다.
-
-따라서 현재 결론은:
-
-```text
-Codex
-→ 핵심 요구사항을 직접 검증하는 테스트
-
-Claude
-→ 구조적 위험과 edge case(경계 사례)를 넓게 검증하는 테스트
-```
-
-로 정리하는 것이 적절합니다.
-
----
-
-### Technical Writer (기술 문서 작성자) — 기술 문서 작성
-
-Claude가 더 상세하고 검증 가능한 문서를 작성하는 경향이 있었습니다.
-
-반면 Codex는 훨씬 짧고 빠르게 읽을 수 있는 결과를 만드는 데 강했습니다.
-
-따라서:
-
-```text
-상세 설계 문서
-→ Claude
-
-PR(Pull Request, 풀 리퀘스트) 요약 / 짧은 결과 보고
-→ Codex
-```
-
-가 더 적합해 보였습니다.
-
----
-
-# 실험 방식
-
-모든 실험은 가능한 한 다음 조건을 유지했습니다.
+가능한 한 동일한 조건을 유지했습니다.
 
 ```text
 Same Requirement (동일 요구사항)
 Same Repository (동일 저장소)
 Same Baseline (동일 기준 상태)
 Independent Execution (독립 실행)
-Separate Result Directory (분리된 결과 디렉터리)
+Separate Result Directory (결과 분리)
 Same Evaluation Criteria (동일 평가 기준)
 Cross Evaluation (교차 평가)
 ```
 
-각 Agent(에이전트)는 상대 Agent(에이전트)의 결과를 보지 않은 상태에서 독립적으로 작업했습니다.
+## 1. 독립 실행
 
-이후 비교 평가 단계에서는 각 평가자가 **자신의 결과물과 상대 Agent(에이전트)의 결과물을 모두 확인한 뒤**,
-동일한 평가 기준으로 두 결과를 함께 판단했습니다.
-
-즉, 실험은 다음 순서로 진행했습니다.
+각 Agent는 상대 Agent의 결과를 보지 않은 상태에서 같은 기준 코드에서 독립적으로 작업했습니다.
 
 ```text
-1차 결과 작성
-→ Codex와 Claude가 서로의 결과를 보지 않고 독립 수행
-
-결과물 교환
-→ Codex 결과와 Claude 결과를 모두 평가 입력으로 제공
-
-상호 평가
-→ 각 평가자가 자기 결과와 상대 결과를 같은 기준으로 비교
-
-종합 판단
-→ 두 평가자의 평가 결과를 함께 확인해 최종 해석
+Baseline
+├── Codex Experiment
+└── Claude Experiment
 ```
 
-작업 결과는 다음과 같이 분리했습니다.
+## 2. 실제 Repository 수정
+
+채팅 답변만 비교하지 않았습니다.
+
+각 Agent가 실제 파일을 수정하고 테스트를 실행하도록 했습니다.
+
+## 3. 결과물 분리
 
 ```text
 benchmark/results/
@@ -371,155 +184,149 @@ benchmark/results/
     └── claude/
 ```
 
-평가 역시 독립적으로 수행했습니다.
-각 평가자는 자신의 평가가 완료되기 전까지 상대 평가자의 평가 파일을 보지 않았고,
-평가 시에는 자기 Agent 결과와 상대 Agent 결과를 모두 직접 확인했습니다.
+## 4. 교차 평가
+
+구현 결과가 완료된 뒤에는 각 결과물을 동일한 기준으로 비교했습니다.
 
 ```text
-benchmark/evaluations/
-├── task-001-002/
-│   ├── chatgpt-review.md
-│   └── claude-review.md
-└── task-003/
-    ├── chatgpt-review.md
-    └── claude-review.md
+독립 실행
+→ 결과물 교환
+→ 동일 기준 평가
+→ 교차 검증
+→ 종합 판단
 ```
+
+평가자는 평가가 완료되기 전 상대 평가자의 결론을 보지 않도록 분리했습니다.
 
 ---
 
-# Task 001 — AI Coding CLI Research & Strategy (AI 코딩 CLI 조사 및 전략)
+# Task 001 — AI Coding CLI Research & Strategy
+### AI 코딩 CLI 조사 및 전략
 
 ## 목적
 
-첫 번째 과제는 코드 구현이 아니라
-**AI Coding CLI(AI 코딩 CLI) 활용 전략 조사 및 문서화 능력**을 비교하는 것이었습니다.
+첫 번째 Task는 코드 구현이 아니라 **AI Coding CLI 활용 전략 조사 및 문서화 능력**을 비교하는 것이었습니다.
 
-주요 질문:
+주요 관점은 다음과 같습니다.
 
-- AI Coding CLI(AI 코딩 CLI)는 일반 Chat(채팅) 기반 AI와 무엇이 다른가?
-- Repository(저장소) 문맥을 어떻게 활용하는가?
-- 파일 수정, Shell(셸) 실행, 테스트, Git(깃) 작업을 어떻게 연결하는가?
-- Codex CLI와 Claude Code의 권한/통제 방식은 어떻게 다른가?
-- 실제 개발 Workflow(작업 흐름)에 어떻게 적용할 수 있는가?
-- 향후 Multi-Agent(멀티 에이전트) / CI/CD 구조로 어떻게 확장할 수 있는가?
+- 일반 Chat 기반 AI와 Coding CLI의 차이
+- Repository 문맥 활용
+- 파일 수정 / Shell 실행 / 테스트 / Git 작업 연결
+- 권한 및 통제 방식
+- 실제 개발 Workflow 적용
+- Multi-Agent / CI/CD 확장 가능성
 
----
+## 결과
 
-## Task 001 결과
+### ChatGPT 평가
+
+```text
+Codex  : 92 / 100
+Claude : 97 / 100
+```
+
+### Claude 평가
+
+```text
+Codex  : 85 / 100
+Claude : 90 / 100
+```
+
+### 해석
 
 **Claude 우세**
 
-Claude는 기술적 정확성, 구체성, 실행 가능성, 위험 통제 측면에서 더 높은 평가를 받았습니다.
+Claude는 공식 문서 기반의 기술 설명, 위험요소, 권한 구조, 설정 및 운영 통제를 더 상세하게 다뤘습니다.
 
-Codex는 상대적으로 더 간결하고 빠르게 읽을 수 있는 문서를 만들었습니다.
-
-### Codex 특징
-
-- 간결함
-- 실무자가 빠르게 읽기 좋은 구조
-- 불필요하게 길지 않음
-- 핵심 Workflow(작업 흐름)를 빠르게 전달
-
-### Claude 특징
-
-- 공식 문서 기반 세부 설명
-- 권한 / Sandbox(샌드박스) / Hook(훅) / 설정 구조 조사
-- 불확실한 항목을 명확히 구분
-- 위험 요소와 운영 통제를 상세히 설명
-
-### 결론
+Codex는 상대적으로 짧고 핵심이 빠르게 보이는 문서를 만들었습니다.
 
 ```text
-기술 조사 / 상세 문서
+상세 기술 조사 / 검증 가능한 문서
 → Claude
 
-간결한 실무 가이드
+간결한 실무 요약
 → Codex
 ```
 
 ---
 
-# Task 002 — Bug Fix & Test (버그 수정 및 테스트)
+# Task 002 — Bug Fix & Test
+### 버그 수정 및 테스트
 
 ## 목적
 
 기존 FastAPI 프로젝트에서 명확한 버그를 수정하도록 했습니다.
 
-### 요구사항
-
-#### 이메일 중복 생성 방지
+주요 요구사항:
 
 ```text
-POST /users
+Case-insensitive duplicate email prevention
+(대소문자를 구분하지 않는 중복 이메일 방지)
+
+Safe user ID generation after deletion
+(사용자 삭제 후에도 안전한 ID 생성)
+
+Tests
+(테스트)
+
+README update
+(문서 수정)
 ```
 
-- 이메일 중복 금지
-- 대소문자 무시
-- 중복 시 HTTP 409
-- detail: `Email already exists`
+## 결과
 
-#### 사용자 ID 충돌 방지
-
-기존 구현:
-
-```python
-new_id = len(users) + 1
-```
-
-사용자 삭제 후 새로운 사용자를 생성하면
-기존 ID와 충돌할 수 있는 문제를 수정하도록 했습니다.
-
----
-
-## Task 002 결과
-
-ChatGPT 평가:
+### ChatGPT 평가
 
 ```text
 Codex  : 96 / 100
 Claude : 96 / 100
-Result (결과) : Draw (무승부)
+Result : Draw (무승부)
 ```
 
-핵심 구현 능력은 **실질적으로 동급**으로 평가했습니다.
+### Claude 평가
+
+```text
+Codex  : 87 / 100
+Claude : 89 / 100
+```
+
+핵심 Implementation(구현) 능력은 **실질적으로 동급**으로 판단했습니다.
 
 ### Codex 특징
 
-- 요구사항을 만족하는 최소 변경
-- 작은 patch
-- 단순한 구현 구조
-- 변경 범위가 작아 리뷰 비용이 낮음
+- 요구사항 중심의 최소 변경
+- 작은 patch(패치)
+- 단순한 구현
+- 리뷰하기 쉬운 변경 범위
 
 ### Claude 특징
 
-- 테스트 범위가 더 넓음
+- 더 넓은 테스트 범위
 - 데이터 불변성 확인
-- 설계 이유를 상세하게 기록
-- 테스트 및 설명이 더 촘촘함
-
-### 결론
+- 상세한 설계 설명
+- 추가 검증이 많음
 
 ```text
-최소 변경 구현
+Minimal Implementation (최소 변경 구현)
 → Codex
 
-테스트 확장 / 설명
+Broader Validation (넓은 검증)
 → Claude
 
-핵심 구현력
+Core Coding Ability (핵심 구현 능력)
 → 실질 동급
 ```
 
 ---
 
-# Task 003 — Planning + Feature Development (계획 및 기능 개발)
+# Task 003 — Planning + Feature Development
+### 계획 및 기능 개발
 
 ## 목적
 
-Task 003에서는 단순 버그 수정보다
-**설계 판단이 필요한 기능 추가**를 비교했습니다.
+Task 003에서는 단순 버그 수정보다 **설계 판단이 필요한 기능 추가**를 비교했습니다.
 
-새 API(Application Programming Interface, 응용 프로그램 인터페이스):
+새 API:
 
 ```text
 GET /users/search?email=<keyword>
@@ -532,75 +339,29 @@ GET /users/search?email=<keyword>
 - case-insensitive(대소문자 무시)
 - 부분일치 검색
 - 여러 사용자 반환
-- 검색 결과 없음 → `200 []`
+- 결과 없음 → `200 []`
 - 기존 API 유지
 - Task 002 기능 유지
 - README 반영
+- 구현 전 `plan.md` 작성
 
-이번 Task부터는 구현 전에 `plan.md`를 작성하도록 했습니다.
+## 핵심 변수
 
-```text
-Planning (계획)
-→ Implementation (구현)
-→ Test (테스트)
-→ Documentation (문서화)
-```
-
-전체 흐름을 함께 비교하기 위한 목적이었습니다.
-
----
-
-## Task 003 결과
-
-두 평가자 모두 **Codex 우세**로 판단했습니다.
-
-### ChatGPT Evaluator
+Task 문서에는 **Task 002의 동작을 유지**해야 한다고 명시되어 있었지만 실제 baseline에는 해당 기능이 빠져 있었습니다.
 
 ```text
-Codex  : 93 / 100
-Claude : 92 / 100
-Winner (승자) : Codex
+Specification (요구사항)
+→ Task 002 behavior 유지
+
+Actual Baseline (실제 기준 코드)
+→ Task 002 behavior 없음
 ```
 
-### Claude Evaluator
-
-```text
-Codex  : 92 / 100
-Claude : 86 / 100
-Winner (승자) : Codex
-```
-
----
-
-## 핵심 차이
-
-검색 API 자체의 구현 능력은 두 Agent가 상당히 비슷했습니다.
-
-두 Agent 모두 다음과 같은 핵심 설계에 독립적으로 도달했습니다.
-
-```text
-검색 로직
-→ service.py
-
-HTTP Validation
-→ main.py
-
-Response Model
-→ 기존 UserResponse 재사용
-
-Route
-→ /users/search 를 /users/{user_id}보다 먼저 선언
-```
-
-그러나 Task 003 문서에는 Task 002 기능 유지 요구가 있었고,
-실제 baseline에는 해당 기능이 빠져 있는 불일치가 존재했습니다.
-
-여기서 판단이 갈렸습니다.
+여기서 두 Agent의 판단이 갈렸습니다.
 
 ### Codex
 
-Task 002 기능이 현재 코드에 없다면 함께 반영한다는 조건부 계획을 세우고,
-실제로 다음 기능까지 복원했습니다.
+Task 002 기능이 없다면 함께 복원한다는 조건부 계획을 세웠고 실제 구현에도 반영했습니다.
 
 - 이메일 중복 방지
 - 안전한 사용자 ID 생성
@@ -608,14 +369,31 @@ Task 002 기능이 현재 코드에 없다면 함께 반영한다는 조건부 �
 
 ### Claude
 
-baseline과 Task 문서의 불일치를 더 깊게 분석했지만,
-baseline을 우선하는 방향으로 판단해 Task 002 기능을 최종 구현에 포함하지 않았습니다.
+요구사항과 baseline의 불일치를 더 깊게 분석했습니다.
 
-결과적으로 최종 산출물 기준으로는 Codex가 요구사항을 더 완결적으로 만족했습니다.
+그러나 최종적으로 baseline을 우선 해석했고 Task 002 기능을 구현에 포함하지 않았습니다.
 
----
+즉 **분석은 Claude가 더 깊었지만, 최종 산출물은 Codex가 전체 요구사항을 더 완결적으로 충족했습니다.**
 
-# Task 003 실행 효율
+## 평가 결과
+
+### ChatGPT Evaluator
+
+```text
+Codex  : 93 / 100
+Claude : 92 / 100
+Winner : Codex
+```
+
+### Claude Evaluator
+
+```text
+Codex  : 92 / 100
+Claude : 86 / 100
+Winner : Codex
+```
+
+## 실행 효율
 
 ```text
 Modified Files (수정 파일 수)
@@ -634,327 +412,243 @@ Codex  : 2
 Claude : 7
 ```
 
-변경량은 거의 동일했습니다.
+변경량은 거의 동일했지만 Codex는 더 적은 테스트 실행으로 Task 003 기능과 Task 002 기능 복원까지 완료했습니다.
 
-하지만 Codex는 같은 수준의 변경량 안에서
-Task 003 검색 기능과 Task 002 기능 복원까지 함께 처리했습니다.
-
-두 평가 모두 **품질 대비 실행 효율은 Codex 우세**로 판단했습니다.
+이 Task에서는 **품질 대비 실행 효율도 Codex 우세**로 판단했습니다.
 
 ---
 
-# 속도 — 가장 크게 체감된 차이
+# 역할별 관찰 결과
 
-이번 실험에서 가장 눈에 띈 차이는 **Codex 5.5 medium의 작업 속도**였습니다.
+이번 3개 Task만을 기준으로 한 잠정적인 판단입니다.
 
-실제 사용 과정에서 Codex 5.5 medium이 Claude Opus 5 high보다 훨씬 빠르게 작업을 완료했습니다.
+| 역할 | 관찰 결과 |
+|---|---|
+| Researcher (기술 조사) | **Claude 우세** |
+| Requirement Analyst (요구사항 분석) | **Claude가 더 깊은 분석 경향** |
+| Planner (설계 / 계획) | **단순 우열 보류 — 서로 다른 장점** |
+| Coder (구현 / 개발) | **Codex 근소 우세** |
+| Fast Fix Agent (빠른 수정) | **Codex 우세** |
+| Tester (테스트 / 검증) | **실질 동급, 스타일 차이** |
+| Deep Validator (심층 검증) | **Claude 성향 강함** |
+| Technical Writer (기술 문서) | **Claude 우세** |
+| Concise Reporter (간결한 보고) | **Codex 우세** |
+| Reviewer (코드 리뷰) | **이 실험에서는 판단 보류** |
+| Debugger (디버깅) | **이 실험에서는 판단 보류** |
 
-다만 모든 Task에서 동일한 자동 측정 방식으로 시작/종료 시각을 기록하지 않았기 때문에
-다음과 같이 표현합니다.
+중요한 점은 **깊은 분석과 최종 실행 완결성은 같은 의미가 아니었다**는 것입니다.
 
-> **Codex가 실험 전반에서 훨씬 빠르게 작업을 완료하는 경향을 보였다.  
-> 다만 정확한 wall-clock(실제 경과 시간) 비교는 모든 Task에서 일관되게 기록하지 못했으므로 정성적 관찰로 분류한다.**
+Task 003에서 Claude는 문제를 더 깊게 분석했지만 최종 요구사항 충족도에서는 Codex가 더 좋은 결과를 만들었습니다.
 
-향후에는 다음 항목까지 자동 수집할 수 있습니다.
+---
+
+# 속도 (Execution Speed)
+
+실험 과정에서 가장 크게 체감된 차이는 **Codex의 작업 속도**였습니다.
+
+Codex가 Claude보다 훨씬 빠르게 결과를 완성하는 경향이 있었습니다.
+
+다만 모든 Task에서 시작/종료 시각을 동일한 자동화 방식으로 기록하지 않았기 때문에:
 
 ```text
-Execution Time (실행 시간)
-Token Usage (토큰 사용량)
-API / Subscription Cost (API / 구독 비용)
-Test Retry Count (테스트 재시도 횟수)
-Human Intervention Count (사람 개입 횟수)
+Codex가 Claude보다 X배 빠르다
 ```
 
+와 같은 정량적 결론은 내리지 않습니다.
+
+따라서 속도 차이는 **Qualitative Observation(정성적 관찰)**으로만 기록합니다.
+
 ---
 
-# 실제 개발에서의 활용 전략
+# 이 실험에서 얻은 활용 전략
 
-## Case 1 — 요구사항이 명확한 경우
+이번 결과만 놓고 보면 다음과 같은 선택이 가능했습니다.
+
+## 명확한 구현 작업
 
 ```text
-Issue (이슈)
-  ↓
+Issue / Requirement
+        ↓
 Codex
-  ↓
-Test (테스트)
-  ↓
-PR (Pull Request, 풀 리퀘스트)
-  ↓
-Human Review (사람 검토)
+        ↓
+Implementation
+        ↓
+Test
+        ↓
+Human Review
 ```
 
 예:
 
-- 간단한 API 추가
-- 버그 수정
-- 테스트가 이미 있는 기능 수정
-- 명확한 리팩터링
+- 작은 API 추가
+- 명확한 버그 수정
 - 반복적인 코드 변경
+- 기존 테스트가 존재하는 작업
+- 빠른 patch가 필요한 작업
 
----
-
-## Case 2 — 요구사항이 모호하거나 설계 판단이 필요한 경우
+## 분석이 먼저 필요한 작업
 
 ```text
-Issue (이슈)
-  ↓
+Issue / Requirement
+        ↓
 Claude
-요구사항 분석 / 기술 조사 / 대안 비교
-  ↓
-Human Approval (사람 승인)
-  ↓
-Codex
-구현
-  ↓
-Test (테스트)
-  ↓
-Claude 또는 별도 Review Agent(리뷰 에이전트)
-심층 검토
-  ↓
-Human Review (사람 검토)
+        ↓
+Requirement Analysis
+Technical Research
+Alternative Comparison
+        ↓
+Human Decision
+        ↓
+Implementation
 ```
-
----
-
-# Multi-Agent Workflow Hypothesis (멀티 에이전트 작업 흐름 가설)
-
-현재까지의 실험 결과를 기반으로
-다음과 같은 Multi-Agent(멀티 에이전트) 구조를 가설로 설정했습니다.
-
-```text
-┌────────────────────────────────────┐
-│ Research / Requirement Analysis    │
-│ 기술 조사 / 요구사항 분석         │
-│              Claude                │
-└─────────────────┬──────────────────┘
-                  │
-                  ▼
-┌────────────────────────────────────┐
-│ Planning                           │
-│ 설계 / 계획                         │
-│ Claude + Codex Cross Validation    │
-│ Claude + Codex 교차 검증           │
-└─────────────────┬──────────────────┘
-                  │
-                  ▼
-┌────────────────────────────────────┐
-│ Implementation                     │
-│ 구현 / 개발                         │
-│              Codex                 │
-└─────────────────┬──────────────────┘
-                  │
-                  ▼
-┌────────────────────────────────────┐
-│ Testing / Validation               │
-│ 테스트 / 검증                       │
-│      Codex + Claude Cross Test     │
-│      Codex + Claude 교차 테스트    │
-└─────────────────┬──────────────────┘
-                  │
-                  ▼
-┌────────────────────────────────────┐
-│ Deep Review                        │
-│ 심층 검토                           │
-│        Claude / Review Agent       │
-│        Claude / 리뷰 에이전트      │
-└─────────────────┬──────────────────┘
-                  │
-                  ▼
-┌────────────────────────────────────┐
-│ Human Approval                     │
-│ 사람 최종 검토 / Merge(병합) 승인  │
-└────────────────────────────────────┘
-```
-
-핵심은 한 Agent(에이전트)에게 모든 업무를 맡기는 것이 아닙니다.
-
-> **빠른 구현은 Codex, 깊은 분석과 검증은 Claude**
-
-라는 서로 다른 특성을 Workflow(작업 흐름)에 배치하는 것이 목적입니다.
-
----
-
-# Repository Structure (저장소 구조)
-
-```text
-.
-├── app/
-├── tests/
-├── benchmark/
-│   ├── experiment-definition.md
-│   ├── task-001.md
-│   ├── task-002.md
-│   ├── task-003.md
-│   │
-│   ├── prompts/
-│   │
-│   ├── results/
-│   │   ├── task-001/
-│   │   ├── task-002/
-│   │   └── task-003/
-│   │
-│   └── evaluations/
-│       ├── task-001-002/
-│       └── task-003/
-│
-└── README.md
-```
-
-실제 Agent(에이전트) 결과, diff(차이), plan(계획) 및 평가 자료는
-`benchmark/` 아래에서 확인할 수 있습니다.
-
----
-
-# Branch Strategy (브랜치 전략)
-
-각 Agent(에이전트)가 상대 구현에 영향을 받지 않도록
-실험 과정에서는 별도 branch(브랜치)를 사용했습니다.
 
 예:
 
-```text
-benchmark-base
-
-experiment/codex-task-002
-experiment/claude-task-002
-
-benchmark/task-003-base
-
-experiment/codex-task-003
-experiment/claude-task-003
-```
-
-각 Agent(에이전트)는 동일한 baseline(기준 상태)에서 독립적으로 작업했습니다.
-
-최종 `main` branch(메인 브랜치)에는 실험 결과와 평가 자료를 통합하되,
-각 Agent(에이전트)의 실제 작업 이력은 실험 branch(브랜치)에 유지합니다.
+- 요구사항이 모호한 기능
+- 여러 설계 대안이 존재하는 문제
+- 기술 조사
+- 위험요소 검토
+- 상세 문서 작성
 
 ---
 
-# 이번 실험에서 얻은 결론
+# 중요한 구분 — 후속 연구는 이 역할 배치를 그대로 적용한 실험이 아님
 
-가장 중요한 결론은
-
-> **Codex와 Claude 중 어느 것이 더 좋은가?**
-
-가 아니었습니다.
-
-실제로는 각 Agent(에이전트)의 강점이 달랐습니다.
+이 연구에서 다음과 같은 가설을 세울 수 있었습니다.
 
 ```text
-Codex
-→ 빠르게 구현
-→ 간결한 결과
-→ 작은 변경
-→ 높은 실행 효율
+분석 / 조사
+→ Claude
 
-Claude
-→ 깊은 분석
-→ 넓은 검증
-→ 상세한 계획
-→ 검증 가능한 문서
+명확한 구현
+→ Codex
+
+깊은 검증
+→ Claude 또는 별도 Review Agent
+
+최종 승인
+→ Human
 ```
 
-따라서 현재 기준으로는 다음 전략이 가장 적절하다고 판단합니다.
+하지만 **후속 연구인 `AI PR Review Agent`는 이 조합의 성능을 검증하는 Multi-Agent 실험으로 바로 이어지지 않았습니다.**
 
-> **명확한 구현 작업에는 Codex를 우선 사용하고,  
-> 요구사항 분석·기술 조사·깊은 검토가 필요한 작업에는 Claude를 사용한다.**
+첫 번째 연구를 진행하면서 새롭게 생긴 질문은 다음이었습니다.
 
----
+> **“AI가 코드를 잘 작성하는 것과 별개로, AI Reviewer가 실제 Pull Request를 제대로 검증할 수 있는가?”**
 
-# 한계 (Limitations)
+따라서 두 번째 연구에서는 Codex와 Claude의 Coding 성능을 다시 비교하지 않고, **PR Review 자체의 유효성을 독립된 주제로 분리**했습니다.
 
-이번 결과를 일반적인 모델 순위로 해석하지 않기 위해 다음 한계를 명확히 둡니다.
+이 때문에 후속 연구에서는 실행 환경을 Claude Code로 통일하고:
 
-- Task 수는 3개입니다.
-- 특정 Repository와 특정 문제 유형에서 진행했습니다.
-- 모델 버전과 reasoning level(추론 수준)이 달라지면 결과도 달라질 수 있습니다.
-- 모든 Task의 wall-clock time(실제 경과 시간)을 동일한 방식으로 자동 기록하지 않았습니다.
-- Reviewer(코드 리뷰어)와 Debugger(디버거) 역할은 이 실험에서 독립적으로 충분히 검증하지 않았습니다.
-- 따라서 결과는 모든 상황에서의 절대적인 모델 우열을 의미하지 않습니다.
+```text
+Claude Code Coding / Execution
+        ↓
+Pull Request
+        ↓
+별도의 Claude Code Reviewer Session
+        ↓
+Review Decision
+        ↓
+Human Final Decision
+```
 
-이번 결과는 다음처럼 해석하는 것이 적절합니다.
+구조를 사용했습니다.
 
-> **이 실험 조건에서 관찰한 Codex와 Claude Code의 상대적인 작업 특성**
+즉,
+
+```text
+1번 연구의 결과를 그대로 적용한 실험
+X
+
+1번 연구에서 발견한 새로운 문제를 분리해 검증한 후속 연구
+O
+```
+
+입니다.
+
+이 구분은 두 Repository의 관계를 이해하는 데 중요합니다.
 
 ---
 
 # 후속 연구 — AI PR Review Agent
 
-이번 Benchmark를 진행하면서 다음 질문이 자연스럽게 생겼습니다.
+첫 번째 연구를 통해 Coding Agent마다 다른 강점이 있다는 점을 확인했지만, 동시에 더 근본적인 질문이 남았습니다.
 
-> **AI Coding Agent가 코드를 잘 작성한다면, 그 결과물을 AI가 다시 검증하게 할 수 있을까?**
+AI가 빠르게 코드를 작성하더라도:
 
-Agent가 빠르게 코드를 작성하더라도 다음 과정은 여전히 필요했습니다.
+- 요구사항을 제대로 구현했는가?
+- 기존 동작을 깨뜨리지 않았는가?
+- 테스트가 통과하면 정말 안전한가?
+- 변경 범위가 적절한가?
+- 최종 Merge 판단까지 AI에게 맡겨도 되는가?
 
-- 요구사항을 실제로 정확하게 구현했는지
-- 기존 기능을 깨뜨리지 않았는지
-- 테스트가 놓친 문제가 없는지
-- 변경 범위가 요구사항에 비해 과도하지 않은지
-- AI가 단독으로 판단하기 어려운 부분을 사람에게 넘길 수 있는지
+를 별도로 확인할 필요가 있었습니다.
 
-그래서 다음 프로젝트에서는 Coding Agent의 구현 능력 자체보다
-**Pull Request를 AI가 검토하고 Merge 가능 여부를 판단하는 과정**으로 연구 범위를 확장했습니다.
+그래서 다음 프로젝트에서는 **Agent 간 Coding 성능 비교가 아니라 AI Code Review 자체**를 실험했습니다.
 
-후속 프로젝트:
-
-```text
-AI PR Review Agent
-→ Pull Request 분석
-→ Diff / 관련 코드 / pytest 결과 검토
-→ APPROVE (승인 가능)
-   / REQUEST_CHANGES (수정 필요)
-   / HUMAN_REVIEW (사람 검토 필요)
-→ Human Final Decision (사람 최종 결정)
-```
-
-GitHub Repository:
+### AI PR Review Agent
 
 `https://github.com/kimseongmin0301/ai-pr-review-agent`
 
-두 프로젝트의 흐름은 다음과 같습니다.
+연구 흐름은 다음과 같습니다.
 
 ```text
-1단계 — AI Coding Agent Benchmark
-“어떤 Agent가 어떤 개발 작업에 강한가?”
+연구 1
+AI Coding Agent Benchmark
+“어떤 Agent가 어떤 개발 업무에 강한가?”
+
+        ↓
+새로운 질문 발생
+
+연구 2
+AI PR Review Agent
+“AI Reviewer는 실제 PR을 어디까지 검증할 수 있는가?”
 
         ↓
 
-2단계 — AI PR Review Agent
-“AI가 작성한 코드를 AI가 다시 검증할 수 있는가?”
-
-        ↓
-
-3단계 — Human-in-the-loop
-“어디까지 AI에게 맡기고, 어디서부터 사람이 검증해야 하는가?”
+Human-in-the-loop
+“어디까지 AI에게 맡기고 어디서부터 사람이 판단해야 하는가?”
 ```
 
-즉 이 Repository는 단순한 Codex vs Claude 승패 비교가 아니라,
+---
 
-> **AI Coding Agent를 실제 개발 Workflow에 어떻게 배치하고 활용할 것인지 탐색하기 위한 첫 번째 실험**
+# 한계 (Limitations)
 
-이라는 의미를 갖습니다.
+이번 결과는 다음 범위 안에서 해석해야 합니다.
+
+- Task는 3개입니다.
+- 특정 FastAPI Repository와 문제 유형을 사용했습니다.
+- 사용한 모델 및 reasoning level에 따라 결과가 달라질 수 있습니다.
+- 모든 Task의 wall-clock time을 동일하게 기록하지 않았습니다.
+- Reviewer와 Debugger 역할은 이 연구에서 독립적으로 충분히 검증하지 않았습니다.
+- 따라서 결과는 모든 상황에서의 절대적인 모델 우열을 의미하지 않습니다.
+
+> **이번 결과는 이 실험 조건에서 관찰한 Codex와 Claude Code의 상대적인 작업 특성입니다.**
 
 ---
 
 # Final Summary (최종 요약)
 
-> **Claude는 깊은 조사·분석·검증에 강했고, Codex는 빠르고 간결하게 요구사항을 실제 코드로 완성하는 데 강했습니다.**
-
-그리고 실제 사용 과정에서 가장 크게 체감된 차이는 **Codex의 속도**였습니다.
-
-따라서 이 프로젝트의 현재 결론은 다음과 같습니다.
+이번 실험에서 확인한 것은 단순한 모델 순위가 아니었습니다.
 
 ```text
-명확한 구현
-→ Codex
+Codex
+→ 빠른 구현
+→ 간결한 결과
+→ 작은 변경
+→ 높은 실행 효율
 
-조사 / 분석 / 설계 검토
-→ Claude
-
-중요 변경
-→ Codex 구현 + Claude 심층 검토 + Human Approval(사람 승인)
+Claude
+→ 깊은 조사
+→ 넓은 분석
+→ 상세한 검증
+→ 상세한 문서
 ```
 
-이 실험 이후에는 “AI가 코드를 작성하는 능력”에서 한 단계 더 나아가,
-**AI가 Pull Request를 다시 검증하고 사람이 최종 판단하는 Human-in-the-loop(사람 최종 승인) 구조**를 별도의 `AI PR Review Agent` 프로젝트에서 실험했습니다.
+따라서 현재 실험 범위에서의 결론은:
+
+> **명확한 구현 작업에는 Codex가 효율적이었고, 요구사항 분석·기술 조사·깊은 검토가 필요한 작업에서는 Claude가 강점을 보였습니다.**
+
+그리고 이 연구의 가장 중요한 후속 질문은 **“어떤 Agent가 더 좋은가?”에서 “AI가 만든 결과물을 어떻게 검증할 것인가?”로 이동했습니다.**
+
+그 질문을 별도의 `AI PR Review Agent` 프로젝트에서 검증했습니다.
