@@ -1,7 +1,9 @@
 # AI Coding Agent Benchmark
-### Codex CLI vs Claude Code — 개발 업무별 Coding Agent 비교 실험
+### Codex와 Claude — MCP 연동 기반 개발 업무별 Coding Agent 비교 실험
 
-Codex CLI와 Claude Code를 동일한 Repository(저장소), 동일한 요구사항, 동일한 baseline(기준 상태)에서 독립적으로 실행해 **개발 업무의 성격에 따라 어떤 Coding Agent(코딩 에이전트)가 더 적합한지** 비교한 실험 프로젝트입니다.
+ChatGPT 환경에서 MCP(Model Context Protocol, 모델 컨텍스트 프로토콜)로 Repository와 도구를 연결하고, Codex와 Claude를 동일한 Repository(저장소), 동일한 요구사항, 동일한 baseline(기준 상태)에서 독립적으로 실행해 **개발 업무의 성격에 따라 어떤 Coding Agent(코딩 에이전트)가 더 적합한지** 비교한 실험 프로젝트입니다.
+
+> **중요:** 이 연구에서는 Codex CLI나 Claude Code CLI를 터미널에서 직접 실행하지 않았습니다. 두 Agent 모두 MCP로 연결된 도구 환경에서 실행했으며, 실험 설계·프롬프트 작성·결과 비교·README 정리는 ChatGPT와의 대화를 통해 진행했습니다.
 
 ---
 
@@ -51,7 +53,7 @@ Exploration / Analysis (탐색 / 분석)
 
 # 연구 배경 (Why This Study)
 
-AI Coding Agent를 실제 개발에 활용하면서 단순히
+MCP로 연결한 AI Coding Agent를 실제 개발 작업에 활용하면서 단순히
 
 > **“어느 모델이 더 좋은가?”**
 
@@ -61,7 +63,7 @@ AI Coding Agent를 실제 개발에 활용하면서 단순히
 
 가 더 중요한 질문이라고 생각했습니다.
 
-Codex CLI와 Claude Code 모두 코드 작성, 테스트, 분석, 문서화 등을 수행할 수 있지만 실제 사용 과정에서는 다음과 같은 차이가 나타났습니다.
+Codex와 Claude 모두 MCP를 통해 코드 작성, 테스트, 분석, 문서화 등의 작업을 수행할 수 있지만 실제 사용 과정에서는 다음과 같은 차이가 나타났습니다.
 
 ```text
 요구사항을 해석하는 방식
@@ -77,7 +79,7 @@ Codex CLI와 Claude Code 모두 코드 작성, 테스트, 분석, 문서화 등�
 
 그래서 다음 질문에서 이 실험을 시작했습니다.
 
-> **동일한 Repository, 동일한 요구사항, 동일한 baseline에서 Codex와 Claude Code를 각각 독립적으로 실행하면 실제 결과는 어떻게 달라질까?**
+> **동일한 Repository, 동일한 요구사항, 동일한 baseline에서 Codex와 Claude를 MCP 환경으로 각각 독립적으로 실행하면 실제 결과는 어떻게 달라질까?**
 
 이번 Benchmark(벤치마크 / 비교 실험)에서는 단순히 최종 코드가 동작하는지만 비교하지 않았습니다.
 
@@ -109,19 +111,50 @@ Codex vs Claude
 
 ---
 
-# 실험 비교 조건
+# 실험 환경 및 실행 방식 (Environment & Execution)
 
-이번 비교는 다음 설정을 기준으로 수행했습니다.
+이번 연구는 CLI(Command Line Interface, 명령줄 인터페이스) 기반 실험이 아닙니다.
+
+ChatGPT에서 실험을 설계하고, MCP(Model Context Protocol)로 연결된 Repository / GitHub / 실행 도구를 통해 각 Agent가 실제 작업을 수행하도록 했습니다.
 
 ```text
-작업 계획과 프롬프트 : GPT-5.6 Sol Medium
-Codex 실행 Agent      : Codex 5.5 Medium
-Claude 실행 Agent     : Claude Opus 5 High
+ChatGPT
+GPT-5.6 Sol Medium
+→ 연구 질문 정리
+→ Task / Prompt 설계
+→ 실험 조건 정리
+→ 결과 비교 및 해석
+→ README 작성
+
+        ↓ MCP 연결
+
+Codex 5.5 Medium
+→ 독립 실행 Agent
+
+Claude Opus 5 High
+→ 독립 실행 Agent
+
+        ↓
+
+Repository 수정
+Test 실행
+Diff 확인
+결과 산출
 ```
 
-Task 정의와 실행 프롬프트는 GPT-5.6 Sol Medium으로 구성했고, 실제 Repository에서 해당 Task를 수행하는 Agent로 Codex와 Claude를 비교했습니다.
+즉 이 연구에서 `Codex`와 `Claude`는 **터미널에서 CLI를 직접 조작해 비교한 것이 아니라, MCP로 연결된 Agent 실행 환경에서 비교**했습니다.
 
-따라서 모델 버전이나 reasoning level(추론 수준)이 달라지면 결과도 달라질 수 있습니다.
+README 역시 실험 종료 후 별도로 수작업 작성한 문서가 아니라, **실험 설계와 결과를 알고 있는 ChatGPT와의 대화를 통해 정리·수정했습니다.**
+
+따라서 본 결과는 다음 조건에 종속됩니다.
+
+- GPT-5.6 Sol Medium이 구성한 Task와 Prompt
+- Codex 5.5 Medium / Claude Opus 5 High
+- MCP로 연결된 당시의 도구 및 Repository 환경
+- 각 Agent에 허용된 도구와 권한
+- 실험 당시의 모델 버전과 reasoning level(추론 수준)
+
+모델이나 도구 환경이 달라지면 결과도 달라질 수 있습니다.
 
 ---
 
@@ -140,6 +173,35 @@ Task 정의와 실행 프롬프트는 GPT-5.6 Sol Medium으로 구성했고, 실
 ---
 
 # 실험 방식 (Method)
+
+실험은 ChatGPT가 전체 비교 구조를 설계하고, MCP로 연결된 Agent가 실제 Repository 작업을 수행하는 방식으로 진행했습니다.
+
+```text
+ChatGPT
+→ Task / Prompt 작성
+→ 동일 조건 정의
+
+        ↓
+
+MCP-connected Agent
+(MCP 연동 Agent)
+
+Codex / Claude
+→ Repository 읽기
+→ 파일 수정
+→ Test
+→ Diff 확인
+→ 결과 작성
+
+        ↓
+
+ChatGPT
+→ 결과 비교
+→ 평가 결과 종합
+→ README 정리
+```
+
+**CLI에서 사람이 명령을 직접 입력해 Agent를 구동한 실험은 아닙니다.**
 
 가능한 한 동일한 조건을 유지했습니다.
 
@@ -200,12 +262,14 @@ benchmark/results/
 
 ---
 
-# Task 001 — AI Coding CLI Research & Strategy
-### AI 코딩 CLI 조사 및 전략
+# Task 001 — AI Coding Agent Research & Strategy
+### AI 코딩 에이전트 활용 조사 및 전략
 
 ## 목적
 
-첫 번째 Task는 코드 구현이 아니라 **AI Coding CLI 활용 전략 조사 및 문서화 능력**을 비교하는 것이었습니다.
+첫 번째 Task는 코드 구현이 아니라 **AI Coding Agent와 관련 도구의 활용 전략을 조사하고 문서화하는 능력**을 비교하는 것이었습니다.
+
+조사 내용에는 Coding CLI의 특성도 포함되었지만, **실험 자체를 CLI로 실행한 것은 아닙니다.**
 
 주요 관점은 다음과 같습니다.
 
@@ -541,11 +605,13 @@ Implementation
 이 때문에 후속 연구에서는 실행 환경을 Claude Code로 통일하고:
 
 ```text
-Claude Code Coding / Execution
+Claude 기반 Coding / Execution Agent
+(MCP 연동)
         ↓
 Pull Request
         ↓
-별도의 Claude Code Reviewer Session
+별도의 Claude Reviewer Session
+(MCP 연동)
         ↓
 Review Decision
         ↓
@@ -609,6 +675,27 @@ AI PR Review Agent
 Human-in-the-loop
 “어디까지 AI에게 맡기고 어디서부터 사람이 판단해야 하는가?”
 ```
+
+---
+
+# 실험 기록과 README 작성 방식
+
+두 연구에서 ChatGPT는 단순한 문서 작성 도구만으로 사용되지 않았습니다.
+
+연구 과정에서 다음 역할을 담당했습니다.
+
+```text
+Research Question 정리
+→ 실험 구조 설계
+→ Task / Prompt 작성
+→ 실행 결과 비교
+→ 결과 해석
+→ README 작성 및 수정
+```
+
+따라서 README는 연구가 끝난 뒤 제3자가 결과만 보고 작성한 문서가 아니라, **실험 계획부터 결과 정리까지 함께 진행한 ChatGPT를 통해 작성된 연구 기록**입니다.
+
+다만 실제 코드 변경과 테스트 결과는 README 문장 자체가 아니라 Repository의 commit, diff, test 결과 및 benchmark 산출물을 기준으로 확인할 수 있도록 구성했습니다.
 
 ---
 
