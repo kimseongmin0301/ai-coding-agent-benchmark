@@ -28,6 +28,82 @@ Claude 실행 Agent    : Claude Opus 5 high
 
 ---
 
+# 연구 배경 (Why This Study)
+
+AI Coding Agent(코딩 에이전트)를 실제 개발에 사용하면서 단순히
+
+> **“어느 모델이 더 좋은가?”**
+
+보다
+
+> **“어떤 개발 업무에서 어떤 Agent를 사용하는 것이 더 적절한가?”**
+
+가 더 중요한 질문이라고 생각했습니다.
+
+Codex CLI와 Claude Code 모두 코드 작성, 테스트, 분석, 문서화까지 수행할 수 있지만,
+실제로 사용해보면 작업 방식에는 분명한 차이가 있었습니다.
+
+예를 들면 다음과 같습니다.
+
+```text
+요구사항을 해석하는 방식
+문제를 분석하는 깊이
+구현을 시작하기까지의 과정
+테스트를 작성하고 검증하는 방식
+변경 범위를 관리하는 방식
+문서화의 상세도
+실제 작업 속도
+```
+
+하지만 이런 차이를 단순한 체감이나 개인적인 선호만으로 판단하고 싶지는 않았습니다.
+
+그래서 다음 질문에서 이 실험을 시작했습니다.
+
+> **동일한 Repository(저장소), 동일한 요구사항, 동일한 baseline(기준 상태)에서  
+> Codex와 Claude Code를 각각 독립적으로 실행하면 실제 결과는 어떻게 달라질까?**
+
+이번 Benchmark(벤치마크 / 비교 실험)에서는 단순히 최종 코드가 동작하는지만 비교하지 않았습니다.
+
+다음 요소를 함께 확인했습니다.
+
+```text
+Requirement Understanding (요구사항 이해)
+Research / Analysis (기술 조사 / 분석)
+Planning (설계 / 계획)
+Implementation (구현)
+Testing / Validation (테스트 / 검증)
+Documentation (문서화)
+Efficiency (작업 효율)
+```
+
+또한 한 Agent가 모든 영역에서 우수하다는 결론을 미리 정하지 않았습니다.
+
+이번 연구의 목적은 단순한 Winner(승자) 선정이 아니라,
+
+```text
+Codex vs Claude
+        ↓
+실제 작업 방식 비교
+        ↓
+각 Agent의 상대적인 강점 / 약점 확인
+        ↓
+개발 Workflow(작업 흐름)에서의 적절한 활용 방법 탐색
+```
+
+에 더 가까웠습니다.
+
+## 이번 연구에서 확인하고 싶었던 질문
+
+1. 동일한 요구사항을 주었을 때 두 Agent의 결과물은 얼마나 달라지는가?
+2. 실제 코드 구현 능력에는 의미 있는 차이가 있는가?
+3. 요구사항이 모호하거나 baseline과 충돌할 때 각 Agent는 어떻게 판단하는가?
+4. 테스트 작성과 검증 방식에는 어떤 차이가 있는가?
+5. 더 깊고 상세한 분석이 항상 더 좋은 구현 결과로 이어지는가?
+6. 속도와 결과 품질 사이에는 어떤 차이가 있는가?
+7. 실제 개발 과정에서는 각 Agent를 어떤 역할에 배치하는 것이 적절한가?
+
+---
+
 # 결론부터
 
 이번 실험에서 가장 크게 체감된 차이는 **속도**였습니다.
@@ -786,41 +862,78 @@ Claude
 
 ---
 
-# Next Step (다음 단계)
+# 한계 (Limitations)
 
-다음 단계에서는 이번 실험 결과를 기반으로
-실제 Multi-Agent Workflow(멀티 에이전트 작업 흐름)를 구성하는 것을 목표로 합니다.
+이번 결과를 일반적인 모델 순위로 해석하지 않기 위해 다음 한계를 명확히 둡니다.
 
-예상 구조:
+- Task 수는 3개입니다.
+- 특정 Repository와 특정 문제 유형에서 진행했습니다.
+- 모델 버전과 reasoning level(추론 수준)이 달라지면 결과도 달라질 수 있습니다.
+- 모든 Task의 wall-clock time(실제 경과 시간)을 동일한 방식으로 자동 기록하지 않았습니다.
+- Reviewer(코드 리뷰어)와 Debugger(디버거) 역할은 이 실험에서 독립적으로 충분히 검증하지 않았습니다.
+- 따라서 결과는 모든 상황에서의 절대적인 모델 우열을 의미하지 않습니다.
+
+이번 결과는 다음처럼 해석하는 것이 적절합니다.
+
+> **이 실험 조건에서 관찰한 Codex와 Claude Code의 상대적인 작업 특성**
+
+---
+
+# 후속 연구 — AI PR Review Agent
+
+이번 Benchmark를 진행하면서 다음 질문이 자연스럽게 생겼습니다.
+
+> **AI Coding Agent가 코드를 잘 작성한다면, 그 결과물을 AI가 다시 검증하게 할 수 있을까?**
+
+Agent가 빠르게 코드를 작성하더라도 다음 과정은 여전히 필요했습니다.
+
+- 요구사항을 실제로 정확하게 구현했는지
+- 기존 기능을 깨뜨리지 않았는지
+- 테스트가 놓친 문제가 없는지
+- 변경 범위가 요구사항에 비해 과도하지 않은지
+- AI가 단독으로 판단하기 어려운 부분을 사람에게 넘길 수 있는지
+
+그래서 다음 프로젝트에서는 Coding Agent의 구현 능력 자체보다
+**Pull Request를 AI가 검토하고 Merge 가능 여부를 판단하는 과정**으로 연구 범위를 확장했습니다.
+
+후속 프로젝트:
 
 ```text
-GitHub Issue (깃허브 이슈)
-    ↓
-Requirement / Planning Agent (요구사항 / 계획 에이전트)
-    ↓
-Human Approval (사람 승인)
-    ↓
-Coding Agent (코딩 에이전트)
-    ↓
-Automated Test (자동 테스트)
-    ↓
-Review Agent (리뷰 에이전트)
-    ↓
-Human Merge (사람 병합)
-    ↓
-CI/CD (지속적 통합 / 지속적 배포)
+AI PR Review Agent
+→ Pull Request 분석
+→ Diff / 관련 코드 / pytest 결과 검토
+→ APPROVE (승인 가능)
+   / REQUEST_CHANGES (수정 필요)
+   / HUMAN_REVIEW (사람 검토 필요)
+→ Human Final Decision (사람 최종 결정)
 ```
 
-향후에는 GitHub Actions와 Coding Agent CLI를 연결해
+GitHub Repository:
 
-- Issue(이슈) 기반 작업 생성
-- 자동 구현
-- 자동 테스트
-- Agent(에이전트) 간 교차 Review(리뷰)
-- Human Approval(사람 승인)
-- CI/CD(지속적 통합 / 지속적 배포)
+`https://github.com/kimseongmin0301/ai-pr-review-agent`
 
-까지 연결할 예정입니다.
+두 프로젝트의 흐름은 다음과 같습니다.
+
+```text
+1단계 — AI Coding Agent Benchmark
+“어떤 Agent가 어떤 개발 작업에 강한가?”
+
+        ↓
+
+2단계 — AI PR Review Agent
+“AI가 작성한 코드를 AI가 다시 검증할 수 있는가?”
+
+        ↓
+
+3단계 — Human-in-the-loop
+“어디까지 AI에게 맡기고, 어디서부터 사람이 검증해야 하는가?”
+```
+
+즉 이 Repository는 단순한 Codex vs Claude 승패 비교가 아니라,
+
+> **AI Coding Agent를 실제 개발 Workflow에 어떻게 배치하고 활용할 것인지 탐색하기 위한 첫 번째 실험**
+
+이라는 의미를 갖습니다.
 
 ---
 
@@ -843,5 +956,5 @@ CI/CD (지속적 통합 / 지속적 배포)
 → Codex 구현 + Claude 심층 검토 + Human Approval(사람 승인)
 ```
 
-이 실험을 기반으로 다음 단계에서는
-두 Agent(에이전트)를 경쟁시키는 것이 아니라 **역할 단위로 조합하는 Multi-Agent(멀티 에이전트) 개발 Workflow(작업 흐름)**를 설계합니다.
+이 실험 이후에는 “AI가 코드를 작성하는 능력”에서 한 단계 더 나아가,
+**AI가 Pull Request를 다시 검증하고 사람이 최종 판단하는 Human-in-the-loop(사람 최종 승인) 구조**를 별도의 `AI PR Review Agent` 프로젝트에서 실험했습니다.
